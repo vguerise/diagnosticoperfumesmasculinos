@@ -1,0 +1,3486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Coleção - Versão Gratuita</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #d4af37, #f4e5b1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.2);
+            color: #d4af37;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* QUIZ STYLES */
+        .quiz-section {
+            display: none;
+        }
+
+        .quiz-section.active {
+            display: block;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .question-number {
+            color: #d4af37;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .question-title {
+            color: white;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .option-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .option-btn.selected {
+            background: linear-gradient(135deg, #d4af37, #f4e5b1);
+            color: #1e1e1e;
+            border-color: #d4af37;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #d4af37, #f4e5b1);
+            color: #1e1e1e;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .next-btn.enabled {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .next-btn.enabled:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.8em;
+            margin: 40px 0 20px 0;
+            text-align: center;
+        }
+
+        .interactive-note {
+            background: rgba(100, 150, 255, 0.1);
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 40px;
+            text-align: center;
+            color: #9bc4ff;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        .balance-title {
+            color: #d4af37;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .balance-description {
+            color: #ccc;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .context-section {
+            background: rgba(100, 150, 255, 0.1);
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        #grid-contexto-cta .context-section {
+            margin-bottom: 0;
+            height: 100%;
+        }
+
+        .context-title {
+            color: #9bc4ff;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .context-item label {
+            color: #9bc4ff;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .context-item input[type="text"],
+        .context-item input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+        }
+
+        .context-item input[type="text"]:focus,
+        .context-item input[type="number"]:focus {
+            outline: none;
+            border-color: #9bc4ff;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ccc;
+            cursor: pointer;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-label:hover {
+            background: rgba(100, 150, 255, 0.1);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .family-counter {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .family-counter {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+        }
+        }
+
+        .counter-item {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .counter-item label {
+            color: #d4af37;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .counter-item input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 5px;
+            color: white;
+        }
+
+        .counter-item input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            background: linear-gradient(90deg, #d4af37, #f4e5b1);
+            color: #1e1e1e;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .result-box {
+            margin-top: 30px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .result-title {
+            color: #d4af37;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .result-content {
+            color: white;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .result-advice {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .result-next {
+            color: #9bc4ff;
+            background: rgba(100, 150, 255, 0.1);
+            border: 2px solid rgba(100, 150, 255, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        .result-next strong {
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '804720092315209');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=804720092315209&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DIAGNÓSTICO DE COLEÇÃO</h1>
+            <p class="subtitle">Descubra se sua coleção está equilibrada</p>
+            <span class="badge">🆓 VERSÃO GRATUITA</span>
+        </header>
+
+        <!-- PRÉ-PÁGINA: BIFURCAÇÃO INICIAL -->
+        <div id="hero-section" class="quiz-section active">
+            <div class="question-card" style="padding: 50px 40px;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="color: #fff; font-size: 2em; margin-bottom: 15px; line-height: 1.3;">
+                        🎯 Qual é a sua situação com perfumes?
+                    </h2>
+                    <p style="color: #ccc; font-size: 1.1em; line-height: 1.6;">
+                        Escolha a opção que melhor descreve você para receber a orientação ideal
+                    </p>
+                </div>
+
+                <!-- GRID DE 2 CARDS -->
+                <div style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 25px;
+                    margin-bottom: 0;
+                ">
+                    <!-- CARD 1: INICIANTE TOTAL (VERMELHO) -->
+                    <div style="
+                        background: linear-gradient(135deg, rgba(255, 100, 100, 0.15) 0%, rgba(255, 100, 100, 0.05) 100%);
+                        border: 3px solid rgba(255, 100, 100, 0.4);
+                        border-radius: 20px;
+                        padding: 35px 30px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        box-shadow: 0 10px 30px rgba(255, 100, 100, 0.2);
+                    " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(255, 100, 100, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(255, 100, 100, 0.2)';">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🤷‍♂️</div>
+                        
+                        <!-- CONTADOR SOCIAL PROOF -->
+                        <div style="
+                            display: inline-block;
+                            padding: 6px 14px;
+                            background: rgba(255, 100, 100, 0.2);
+                            border: 1px solid rgba(255, 100, 100, 0.4);
+                            border-radius: 20px;
+                            margin-bottom: 15px;
+                        ">
+                            <span style="color: #ffcccc; font-size: 0.85em; font-weight: 600;">
+                                🔥 <span id="counter-iniciante">...</span> pessoas descobriram a perfumaria hoje
+                            </span>
+                        </div>
+                        
+                        <h3 style="color: #ff9999; font-size: 1.4em; font-weight: 700; margin-bottom: 15px;">
+                            NÃO SEI NADA
+                        </h3>
+                        <p style="color: #ccc; font-size: 1em; margin-bottom: 25px; line-height: 1.6;">
+                            Não domino perfumaria e quero começar do zero com orientação profissional
+                        </p>
+                        <button onclick="trackCTAClick('Não Sei Nada (Hero)'); abrirPopupIniciante();" style="
+                            width: 100%;
+                            padding: 18px 25px;
+                            font-size: 1.1em;
+                            font-weight: 700;
+                            background: linear-gradient(135deg, #ff6666 0%, #ff4444 100%);
+                            border: none;
+                            color: #fff;
+                            border-radius: 12px;
+                            cursor: pointer;
+                            box-shadow: 0 8px 25px rgba(255, 100, 100, 0.4);
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                            ❌ COMEÇAR DO ZERO
+                        </button>
+                    </div>
+
+                    <!-- CARD 2: JÁ TEM COLEÇÃO (DOURADO/VERDE) -->
+                    <div style="
+                        background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+                        border: 3px solid rgba(212, 175, 55, 0.6);
+                        border-radius: 20px;
+                        padding: 35px 30px;
+                        text-align: center;
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+                    " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(212, 175, 55, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(212, 175, 55, 0.3)';">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📈</div>
+                        
+                        <!-- CONTADOR SOCIAL PROOF -->
+                        <div style="
+                            display: inline-block;
+                            padding: 6px 14px;
+                            background: rgba(212, 175, 55, 0.2);
+                            border: 1px solid rgba(212, 175, 55, 0.5);
+                            border-radius: 20px;
+                            margin-bottom: 15px;
+                        ">
+                            <span style="color: #f4e5b1; font-size: 0.85em; font-weight: 600;">
+                                ✨ <span id="counter-colecao">...</span> pessoas melhoraram suas coleções hoje
+                            </span>
+                        </div>
+                        
+                        <h3 style="color: #f4e5b1; font-size: 1.4em; font-weight: 700; margin-bottom: 15px;">
+                            TENHO COLEÇÃO
+                        </h3>
+                        <p style="color: #ccc; font-size: 1em; margin-bottom: 25px; line-height: 1.6;">
+                            Já tenho perfumes mas quero melhorar e equilibrar minha coleção
+                        </p>
+                        <button onclick="comecarDiagnostico();" style="
+                            width: 100%;
+                            padding: 18px 25px;
+                            font-size: 1.1em;
+                            font-weight: 700;
+                            background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                            border: none;
+                            color: #000;
+                            border-radius: 12px;
+                            cursor: pointer;
+                            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                            ✅ MELHORAR COLEÇÃO
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Media Query para Mobile -->
+                <style>
+                    @media (max-width: 768px) {
+                        #hero-section .question-card > div:nth-child(2) {
+                            grid-template-columns: 1fr !important;
+                        }
+                    }
+                </style>
+            </div>
+        </div>
+
+        <!-- QUIZ SECTION - Perguntas de qualificação -->
+        <!-- QUIZ SECTION - Perguntas de qualificação -->
+        <div id="quiz-1" class="quiz-section">
+            <div class="question-card">
+                <!-- BARRA DE PROGRESSO -->
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: #d4af37; font-size: 0.9em; font-weight: 600;">PERGUNTA 1 DE 3</span>
+                        <span style="color: #888; font-size: 0.85em;">33% completo</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(212, 175, 55, 0.2); border-radius: 10px; overflow: hidden;">
+                        <div style="width: 33%; height: 100%; background: linear-gradient(90deg, #d4af37, #f4e5b1); border-radius: 10px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div class="question-title" style="font-size: 1.6em; margin-bottom: 10px;">👋 Você já usa perfume?</div>
+                <div style="color: #888; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5;">
+                    Queremos entender seu nível atual para personalizar suas recomendações
+                </div>
+                <div class="options-grid">
+                    <button class="option-btn" onclick="selectOption(1, 'sim-sempre', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">✅</span><br>Sim, sempre
+                    </button>
+                    <button class="option-btn" onclick="selectOption(1, 'quando-lembro', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">🤔</span><br>Quando lembro
+                    </button>
+                    <button class="option-btn" onclick="selectOption(1, 'nao-ligo', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">😐</span><br>Não ligo muito
+                    </button>
+                    <button class="option-btn" onclick="selectOption(1, 'nao-sei', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">❓</span><br>Não sei nada
+                    </button>
+                </div>
+                <button class="next-btn" id="next-1" onclick="nextQuestion(1)">Próxima →</button>
+            </div>
+        </div>
+
+        <div id="quiz-2" class="quiz-section">
+            <div class="question-card">
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: #d4af37; font-size: 0.9em; font-weight: 600;">PERGUNTA 2 DE 3</span>
+                        <span style="color: #888; font-size: 0.85em;">66% completo</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(212, 175, 55, 0.2); border-radius: 10px; overflow: hidden;">
+                        <div style="width: 66%; height: 100%; background: linear-gradient(90deg, #d4af37, #f4e5b1); border-radius: 10px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div class="question-title" style="font-size: 1.6em; margin-bottom: 10px;">🤯 Qual sua MAIOR dificuldade?</div>
+                <div style="color: #888; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5;">
+                    Isso ajuda a identificar onde você precisa de mais orientação
+                </div>
+                <div class="options-grid">
+                    <button class="option-btn" onclick="selectOption(2, 'mesmo-tipo', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">🔁</span><br>Compro sempre o mesmo tipo
+                    </button>
+                    <button class="option-btn" onclick="selectOption(2, 'muitas-opcoes', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">🤷</span><br>Muitas opções, não sei qual escolher
+                    </button>
+                    <button class="option-btn" onclick="selectOption(2, 'influenciador', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">💸</span><br>Sigo influencer e perco dinheiro
+                    </button>
+                    <button class="option-btn" onclick="selectOption(2, 'nao-compro', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">🚫</span><br>Nunca compro perfume
+                    </button>
+                </div>
+                <button class="next-btn" id="next-2" onclick="nextQuestion(2)">Próxima →</button>
+            </div>
+        </div>
+
+        <div id="quiz-3" class="quiz-section">
+            <div class="question-card">
+                <div style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="color: #d4af37; font-size: 0.9em; font-weight: 600;">PERGUNTA 3 DE 3</span>
+                        <span style="color: #888; font-size: 0.85em;">99% completo</span>
+                    </div>
+                    <div style="width: 100%; height: 8px; background: rgba(212, 175, 55, 0.2); border-radius: 10px; overflow: hidden;">
+                        <div style="width: 99%; height: 100%; background: linear-gradient(90deg, #d4af37, #f4e5b1); border-radius: 10px; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div class="question-title" style="font-size: 1.6em; margin-bottom: 10px;">💰 Quanto quer investir por perfume?</div>
+                <div style="color: #888; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5;">
+                    Vamos recomendar opções que cabem no seu bolso
+                </div>
+                <div class="options-grid">
+                    <button class="option-btn" onclick="selectOption(3, 'ate-350', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">💵</span><br>Até R$ 350
+                        <div style="font-size: 0.75em; color: #888; margin-top: 5px;">Nacionais e inspirados</div>
+                    </button>
+                    <button class="option-btn" onclick="selectOption(3, '350-1500', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">💳</span><br>R$ 350 a R$ 1.500
+                        <div style="font-size: 0.75em; color: #888; margin-top: 5px;">Designers importados</div>
+                    </button>
+                    <button class="option-btn" onclick="selectOption(3, '1500-2500', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">💎</span><br>R$ 1.500 a R$ 2.500
+                        <div style="font-size: 0.75em; color: #888; margin-top: 5px;">Marcas premium</div>
+                    </button>
+                    <button class="option-btn" onclick="selectOption(3, 'sem-limite', this)">
+                        <span style="font-size: 1.3em; margin-bottom: 5px;">👑</span><br>Sem limite
+                        <div style="font-size: 0.75em; color: #888; margin-top: 5px;">Nichos exclusivos</div>
+                    </button>
+                </div>
+                <button class="next-btn" id="next-3" onclick="startDiagnostic()">Iniciar Diagnóstico →</button>
+            </div>
+        </div>
+
+        <!-- DIAGNOSTIC SECTION -->
+        <div id="diagnostic-section" style="display: none;">
+            <h2 class="section-title">🎯 DIAGNÓSTICO: SUA COLEÇÃO ESTÁ EQUILIBRADA?</h2>
+            
+            <!-- WRAPPER GERAL ALINHADO -->
+            <div style="max-width: 900px; margin: 0 auto;">
+                
+                <!-- TÍTULO -->
+                <div class="balance-section">
+                    <div class="balance-card">
+                        <div class="balance-title">Identifique sua família dominante</div>
+                        <div class="balance-description">
+                            Conte quantos perfumes você tem de cada família. A família com mais perfumes é sua dominante.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRID: Contexto Pessoal -->
+                <div id="grid-contexto-cta" style="
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 25px;
+                    margin-bottom: 30px;
+                    align-items: stretch;
+                ">
+                <!-- CONTEXTO PESSOAL -->
+                <div class="context-section">
+                    <div class="context-title">📍 Contexto Pessoal</div>
+                    
+                    <!-- AMBIENTE DE TRABALHO -->
+                    <div class="context-item" style="margin-bottom: 20px;">
+                        <label style="margin-bottom: 10px; display: block; color: #9bc4ff; font-weight: 600;">💼 Ambiente de trabalho:</label>
+                        <select id="ambiente" style="
+                            width: 100%;
+                            padding: 12px 15px;
+                            font-size: 1em;
+                            background: rgba(0, 0, 0, 0.3);
+                            border: 2px solid rgba(100, 150, 255, 0.3);
+                            border-radius: 8px;
+                            color: white;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        " onfocus="this.style.borderColor='#9bc4ff'" onblur="this.style.borderColor='rgba(100, 150, 255, 0.3)'">
+                            <option value="" selected disabled>Selecione seu ambiente</option>
+                            <option value="fechado">Fechado (escritório, loja)</option>
+                            <option value="aberto">Aberto (obra, rua, campo)</option>
+                            <option value="ambos">Ambos</option>
+                        </select>
+                    </div>
+                    
+                    <!-- CLIMA DA REGIÃO -->
+                    <div class="context-item">
+                        <label style="margin-bottom: 10px; display: block; color: #9bc4ff; font-weight: 600;">🌡️ Clima da sua região:</label>
+                        <input type="hidden" id="clima" value="temperado">
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button type="button" onclick="selecionarClima('quente', this)" class="clima-btn" style="
+                                flex: 1;
+                                padding: 15px 10px;
+                                background: rgba(255, 100, 100, 0.1);
+                                border: 2px solid rgba(255, 100, 100, 0.3);
+                                color: white;
+                                border-radius: 10px;
+                                cursor: pointer;
+                                font-size: 0.95em;
+                                transition: all 0.3s;
+                                text-align: center;
+                            ">
+                                <div style="font-size: 1.5em; margin-bottom: 5px;">☀️</div>
+                                <div style="font-weight: 600;">Quente</div>
+                                <div style="font-size: 0.75em; color: #888; margin-top: 3px;">Norte, Nordeste</div>
+                            </button>
+                            
+                            <button type="button" onclick="selecionarClima('temperado', this)" class="clima-btn" style="
+                                flex: 1;
+                                padding: 15px 10px;
+                                background: rgba(212, 175, 55, 0.3);
+                                border: 2px solid #d4af37;
+                                color: white;
+                                border-radius: 10px;
+                                cursor: pointer;
+                                font-size: 0.95em;
+                                transition: all 0.3s;
+                                text-align: center;
+                                box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+                            ">
+                                <div style="font-size: 1.5em; margin-bottom: 5px;">🌤️</div>
+                                <div style="font-weight: 600;">Temperado</div>
+                                <div style="font-size: 0.75em; color: #888; margin-top: 3px;">Sudeste</div>
+                            </button>
+                            
+                            <button type="button" onclick="selecionarClima('frio', this)" class="clima-btn" style="
+                                flex: 1;
+                                padding: 15px 10px;
+                                background: rgba(150, 200, 255, 0.1);
+                                border: 2px solid rgba(150, 200, 255, 0.3);
+                                color: white;
+                                border-radius: 10px;
+                                cursor: pointer;
+                                font-size: 0.95em;
+                                transition: all 0.3s;
+                                text-align: center;
+                            ">
+                                <div style="font-size: 1.5em; margin-bottom: 5px;">❄️</div>
+                                <div style="font-weight: 600;">Frio</div>
+                                <div style="font-size: 0.75em; color: #888; margin-top: 3px;">Sul</div>
+                            </button>
+                        </div>
+                        
+                        <style>
+                            .clima-btn:hover {
+                                transform: translateY(-3px) scale(1.05);
+                            }
+                            
+                            /* Hover personalizado por clima */
+                            .clima-btn:hover {
+                                box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+                                border-color: #d4af37;
+                            }
+                            
+                            /* QUENTE - Vermelho/Laranja */
+                            .clima-btn.selected-quente {
+                                background: rgba(255, 100, 100, 0.3) !important;
+                                border-color: #ff6666 !important;
+                                box-shadow: 0 0 20px rgba(255, 100, 100, 0.6) !important;
+                            }
+                            
+                            /* TEMPERADO - Amarelo/Dourado */
+                            .clima-btn.selected-temperado {
+                                background: rgba(212, 175, 55, 0.3) !important;
+                                border-color: #d4af37 !important;
+                                box-shadow: 0 0 20px rgba(212, 175, 55, 0.5) !important;
+                            }
+                            
+                            /* FRIO - Azul */
+                            .clima-btn.selected-frio {
+                                background: rgba(100, 150, 255, 0.3) !important;
+                                border-color: #6699ff !important;
+                                box-shadow: 0 0 20px rgba(100, 150, 255, 0.6) !important;
+                            }
+                        </style>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Media Query para Mobile -->
+            <style>
+                @media (max-width: 768px) {
+                    #grid-contexto-cta {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            </style>
+                    
+
+                <!-- FAMÍLIAS OLFATIVAS -->
+                <div class="balance-section">
+                    <div class="balance-card">
+                        <div style="text-align: center; margin-bottom: 25px;">
+                            <div style="color: #d4af37; font-size: 1.5em; font-weight: 700; margin-bottom: 10px;">
+                                📊 Quais famílias você TEM na sua coleção?
+                            </div>
+                            <div style="color: #ccc; font-size: 0.95em; line-height: 1.6;">
+                                Marque todas as famílias que você possui (mínimo 1)
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="family-counter">
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="fresco" data-name="🍋 Fresco/Cítrico">
+                                <span style="font-size: 0.95em; color: #fff;">🍋 Fresco/Cítrico</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="aromatico" data-name="🌿 Aromático/Verde">
+                                <span style="font-size: 0.95em; color: #fff;">🌿 Aromático/Verde</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="doce" data-name="🍯 Doce/Gourmand">
+                                <span style="font-size: 0.95em; color: #fff;">🍯 Doce/Gourmand</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="amadeirado" data-name="🪵 Amadeirado">
+                                <span style="font-size: 0.95em; color: #fff;">🪵 Amadeirado</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="especiado" data-name="🔥 Especiado/Oriental">
+                                <span style="font-size: 0.95em; color: #fff;">🔥 Especiado/Oriental</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="aquatico" data-name="🌊 Aquático">
+                                <span style="font-size: 0.95em; color: #fff;">🌊 Aquático</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="talco" data-name="🧼 Talco/Fougère">
+                                <span style="font-size: 0.95em; color: #fff;">🧼 Talco/Fougère</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="floral" data-name="🌸 Floral">
+                                <span style="font-size: 0.95em; color: #fff;">🌸 Floral</span>
+                            </label>
+                            
+                            <label class="checkbox-label-familia" style="cursor: pointer; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 10px; transition: all 0.3s;">
+                                <input type="checkbox" class="familia-checkbox" data-familia="frutas" data-name="🍓 Frutas">
+                                <span style="font-size: 0.95em; color: #fff;">🍓 Frutas</span>
+                            </label>
+                        </div>
+                        
+                        <style>
+                            .checkbox-label-familia input[type="checkbox"] {
+                                margin-right: 8px;
+                            }
+                            .checkbox-label-familia:hover {
+                                background: rgba(212, 175, 55, 0.15) !important;
+                                border-color: #d4af37 !important;
+                            }
+                            .checkbox-label-familia input[type="checkbox"]:checked + span {
+                                color: #d4af37;
+                                font-weight: 700;
+                            }
+                            .checkbox-label-familia:has(input:checked) {
+                                background: rgba(212, 175, 55, 0.2) !important;
+                                border-color: #d4af37 !important;
+                                box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+                            }
+                        </style>
+
+                    <button class="analyze-btn" onclick="analyzeCollection()">ANALISAR COLEÇÃO</button>
+                </div>
+            </div>
+            </div> <!-- Fecha wrapper alinhado -->
+
+                    <div id="result" class="result-box" style="display: none;">
+                        <div class="result-title">📊 RESULTADO DA ANÁLISE</div>
+                        <div id="dominant-family" class="result-content"></div>
+                        <div id="balance-advice" class="result-advice"></div>
+                        <div id="next-purchase" class="result-next"></div>
+                        
+                        <!-- Botão de I.A. que abre popup de conversão -->
+                    </div>
+        </div>
+    </div>
+
+    <!-- POPUP DE EXIT INTENT -->
+    <div id="popup-exit-intent" style="display: none;">
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 20px;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                border: 3px solid #ff6b6b;
+                border-radius: 20px;
+                padding: 40px;
+                max-width: 550px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(255, 107, 107, 0.5);
+                text-align: center;
+                position: relative;
+            ">
+                <!-- Botão Fechar -->
+                <div onclick="fecharExitPopup()" style="
+                    position: absolute;
+                    top: 15px;
+                    right: 15px;
+                    cursor: pointer;
+                    color: #999;
+                    font-size: 1.5em;
+                    width: 35px;
+                    height: 35px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.3s;
+                "
+                onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff'"
+                onmouseout="this.style.background='transparent'; this.style.color='#999'"
+                >✕</div>
+                
+                <div style="font-size: 2.5em; margin-bottom: 15px;">⚠️</div>
+                
+                <div style="color: #ff6b6b; font-size: 1.8em; font-weight: 700; margin-bottom: 15px; line-height: 1.3;">
+                    Espera! Oferta Especial!
+                </div>
+                
+                <div style="color: #fff; font-size: 1.1em; margin-bottom: 20px; line-height: 1.6;">
+                    Você ia receber <strong style="color: #999; text-decoration: line-through;">1 sugestão</strong>...<br>
+                    Mas vou te dar <strong style="color: #d4af37; font-size: 1.2em;">2 SUGESTÕES</strong> ao invés de 1!
+                </div>
+                
+                <div style="
+                    background: rgba(212, 175, 55, 0.1);
+                    border: 2px solid rgba(212, 175, 55, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 25px;
+                ">
+                    <div style="color: #d4af37; font-size: 1em; font-weight: 600; margin-bottom: 10px;">
+                        🎁 UPGRADE GRATUITO:
+                    </div>
+                    <div style="color: #fff; font-size: 0.95em; line-height: 1.6;">
+                        Digite seu email e receba <strong style="color: #d4af37;">2 SUGESTÕES PERSONALIZADAS</strong> ao invés de apenas 1!
+                    </div>
+                </div>
+                
+                <!-- Mensagem de erro (rate limit) -->
+                <div id="exit-error-msg" style="
+                    display: none;
+                    background: rgba(255, 107, 107, 0.2);
+                    border: 2px solid rgba(255, 107, 107, 0.5);
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    color: #ff6b6b;
+                    font-size: 0.9em;
+                "></div>
+                
+                <!-- Mensagem de sucesso -->
+                <div id="exit-success-msg" style="
+                    display: none;
+                    background: rgba(78, 205, 196, 0.2);
+                    border: 2px solid rgba(78, 205, 196, 0.5);
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    color: #4ecdc4;
+                    font-size: 0.9em;
+                "></div>
+                
+                <form id="form-exit-intent" onsubmit="enviarExitIntent(event); return false;">
+                    <input 
+                        type="email" 
+                        id="exit-email" 
+                        placeholder="Seu melhor e-mail" 
+                        required
+                        style="
+                            width: 100%;
+                            padding: 15px;
+                            margin-bottom: 15px;
+                            font-size: 1.1em;
+                            background: rgba(0, 0, 0, 0.3);
+                            border: 2px solid rgba(212, 175, 55, 0.3);
+                            border-radius: 10px;
+                            color: white;
+                            box-sizing: border-box;
+                        "
+                        onfocus="this.style.borderColor='#d4af37'"
+                        onblur="this.style.borderColor='rgba(212, 175, 55, 0.3)'"
+                    >
+                    
+                    <button type="submit" id="exit-submit-btn" style="
+                        width: 100%;
+                        background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                        color: #000;
+                        border: none;
+                        padding: 18px 30px;
+                        border-radius: 12px;
+                        font-size: 1.1em;
+                        font-weight: 700;
+                        cursor: pointer;
+                        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+                        transition: all 0.3s;
+                        text-transform: uppercase;
+                        margin-bottom: 15px;
+                    "
+                    onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 35px rgba(212, 175, 55, 0.7)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(212, 175, 55, 0.5)'"
+                    >
+                        🎁 SIM, QUERO 2 SUGESTÕES!
+                    </button>
+                </form>
+                
+                <div style="color: #888; font-size: 0.85em; line-height: 1.5;">
+                    ✅ Sem spam. 2 perfumes ideais para você.<br>
+                    ⚡ Envio instantâneo.
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- POPUP DE CAPTURA (NOME + EMAIL) -->
+    <div id="popup-captura" style="display: none;">
+        <div style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        ">
+            <div style="
+                background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                border: 3px solid #d4af37;
+                border-radius: 20px;
+                padding: 50px;
+                max-width: 600px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
+                text-align: center;
+                position: relative;
+            ">
+                <!-- Botão X de Saída -->
+                <div onclick="abrirPopupSaidaDiferenciado()" style="
+                    position: absolute;
+                    top: 15px;
+                    left: 15px;
+                    cursor: pointer;
+                    color: #999;
+                    font-size: 1.8em;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.3s;
+                    font-weight: 700;
+                "
+                onmouseover="this.style.background='rgba(255,107,107,0.2)'; this.style.color='#ff6b6b'; this.style.transform='rotate(90deg)'"
+                onmouseout="this.style.background='transparent'; this.style.color='#999'; this.style.transform='rotate(0deg)'"
+                title="Sair"
+                >✕</div>
+                
+                <div style="font-size: 3em; margin-bottom: 20px;">🔓</div>
+                
+                <div style="color: #d4af37; font-size: 2em; font-weight: 700; margin-bottom: 20px; line-height: 1.3;">
+                    Desbloqueie seu<br>Diagnóstico Personalizado!
+                </div>
+                
+                <div style="color: #ccc; font-size: 1.1em; margin-bottom: 30px; line-height: 1.6;">
+                    Receba seu diagnóstico completo por email<br>
+                    + recomendações personalizadas de perfumes!
+                </div>
+                
+                <form id="form-captura" style="margin-bottom: 20px;">
+                    <input 
+                        type="text" 
+                        id="capture-name" 
+                        placeholder="Seu nome" 
+                        required
+                        style="
+                            width: 100%;
+                            padding: 15px;
+                            margin-bottom: 15px;
+                            font-size: 1.1em;
+                            background: rgba(0, 0, 0, 0.3);
+                            border: 2px solid rgba(212, 175, 55, 0.3);
+                            border-radius: 10px;
+                            color: white;
+                        "
+                        onfocus="this.style.borderColor='#d4af37'"
+                        onblur="this.style.borderColor='rgba(212, 175, 55, 0.3)'"
+                    >
+                    
+                    <input 
+                        type="email" 
+                        id="capture-email" 
+                        placeholder="Seu melhor e-mail" 
+                        required
+                        style="
+                            width: 100%;
+                            padding: 15px;
+                            margin-bottom: 25px;
+                            font-size: 1.1em;
+                            background: rgba(0, 0, 0, 0.3);
+                            border: 2px solid rgba(212, 175, 55, 0.3);
+                            border-radius: 10px;
+                            color: white;
+                        "
+                        onfocus="this.style.borderColor='#d4af37'"
+                        onblur="this.style.borderColor='rgba(212, 175, 55, 0.3)'"
+                    >
+                    
+                    <button 
+                        type="submit"
+                        style="
+                            width: 100%;
+                            background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                            color: #1e1e1e;
+                            border: none;
+                            padding: 18px 50px;
+                            border-radius: 12px;
+                            font-size: 1.3em;
+                            font-weight: 700;
+                            cursor: pointer;
+                            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 40px rgba(212, 175, 55, 0.7)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(212, 175, 55, 0.5)';"
+                    >
+                        🚀 QUERO MEU DIAGNÓSTICO!
+                    </button>
+                </form>
+                
+                <div style="color: #888; font-size: 0.85em; line-height: 1.5;">
+                    🔒 Seus dados estão seguros. Não enviamos spam.
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // ============================================
+        // FUNÇÃO DE TRACKING DE CLIQUES EM CTAs
+        // ============================================
+        function trackCTAClick(ctaName) {
+            console.log('🔔 trackCTAClick CHAMADA! Nome:', ctaName);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            const trackingData = {
+                cta_clicado: ctaName,
+                data_clique: new Date().toLocaleString('pt-BR'),
+                screen: window.screen.width + '×' + window.screen.height,
+                device_type: /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                browser: (navigator.userAgent.match(/(Firefox|Chrome|Safari|Edge|Opera)/) || ['Other'])[0],
+                utm_source: urlParams.get('utm_source') || '',
+                utm_medium: urlParams.get('utm_medium') || '',
+                utm_campaign: urlParams.get('utm_campaign') || '',
+                utm_content: urlParams.get('utm_content') || '',
+                utm_term: urlParams.get('utm_term') || ''
+            };
+            
+            console.log('💾 Salvando no localStorage:', trackingData);
+            localStorage.setItem('cta_tracking', JSON.stringify(trackingData));
+            
+            // Verificar se salvou
+            const saved = localStorage.getItem('cta_tracking');
+            console.log('✅ Confirmação - localStorage agora tem:', saved);
+            
+            console.log('🎯 CTA Clicado:', ctaName);
+            console.log('📊 Tracking Data:', trackingData);
+            
+            // Meta Pixel
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', {
+                    content_name: ctaName,
+                    value: ctaName.includes('Mapa') ? 29.90 : 37.00,
+                    currency: 'BRL'
+                });
+            }
+        }
+        
+        // Função trackEvent (para eventos genéricos)
+        function trackEvent(eventName, eventData = {}) {
+            console.log('📊 trackEvent:', eventName, eventData);
+            
+            // Track via localStorage (similar ao trackCTAClick)
+            const trackingData = {
+                event: eventName,
+                data: eventData,
+                timestamp: new Date().toLocaleString('pt-BR'),
+                screen: window.screen.width + '×' + window.screen.height,
+                device_type: /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+            };
+            
+            // Meta Pixel (se disponível)
+            if (typeof fbq !== 'undefined') {
+                fbq('trackCustom', eventName, eventData);
+            }
+            
+            console.log('✅ Evento trackado:', eventName);
+        }
+        
+        // Testar se a função foi carregada
+        console.log('✅ Função trackCTAClick carregada e disponível!');
+        console.log('🧪 Teste: window.trackCTAClick =', typeof window.trackCTAClick);
+        
+        // ============================================
+        // SISTEMA DE ORDEM DE CLIQUE DAS FAMÍLIAS
+        // ============================================
+        
+        // Array para guardar ordem de clique
+        let familiaClickOrder = [];
+        
+        // Adicionar event listeners aos checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.familia-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const familiaKey = this.dataset.familia;
+                    
+                    if (this.checked) {
+                        // Adiciona na ordem de clique
+                        if (!familiaClickOrder.includes(familiaKey)) {
+                            familiaClickOrder.push(familiaKey);
+                        }
+                    } else {
+                        // Remove da lista
+                        familiaClickOrder = familiaClickOrder.filter(f => f !== familiaKey);
+                    }
+                    
+                    console.log('📋 Ordem de clique atual:', familiaClickOrder);
+                });
+            });
+        });
+        
+        // Função para pegar checkboxes na ordem de clique
+        function getCheckboxesInClickOrder() {
+            const allCheckboxes = document.querySelectorAll('.familia-checkbox:checked');
+            const checkboxesArray = Array.from(allCheckboxes);
+            
+            // Ordenar pelo índice em familiaClickOrder
+            return checkboxesArray.sort((a, b) => {
+                const indexA = familiaClickOrder.indexOf(a.dataset.familia);
+                const indexB = familiaClickOrder.indexOf(b.dataset.familia);
+                return indexA - indexB;
+            });
+        }
+        
+        // ============================================
+// ============================================
+// SISTEMA DE RECOMENDAÇÕES DE PERFUMES
+// ============================================
+
+// ============================================
+// BASE DE DADOS ATUALIZADA - 90 PERFUMES (2015-2025)
+// 10 perfumes por família
+// ============================================
+
+const PERFUMES_DATABASE = [
+    // ========== CÍTRICO (10) ==========
+    {familia:"Cítrico",nome:"Versace Pour Homme Dylan Blue",marca:"Versace",notas:"Bergamota, Toranja, Pimenta",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"iniciante",desc:"Cítrico aromático moderno e versátil",ano:2016},
+    {familia:"Cítrico",nome:"Prada L'Homme",marca:"Prada",notas:"Néroli, Gerânio, Âmbar",clima:"temperado",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Cítrico talcado elegante e sofisticado",ano:2016},
+    {familia:"Cítrico",nome:"Dolce & Gabbana Light Blue Eau Intense",marca:"Dolce & Gabbana",notas:"Toranja, Junípero, Almíscar",clima:"quente",ambiente:"aberto",preco:"400-500",nivel:"iniciante",desc:"Cítrico aquático intenso para o verão",ano:2017},
+    {familia:"Cítrico",nome:"YSL Y Eau de Toilette",marca:"Yves Saint Laurent",notas:"Bergamota, Gengibre, Sálvia",clima:"temperado",ambiente:"ambos",preco:"450-550",nivel:"iniciante",desc:"Cítrico fresco jovem e energético",ano:2017},
+    {familia:"Cítrico",nome:"Versace Eros Flame",marca:"Versace",notas:"Limão, Tangerina, Pimenta",clima:"temperado",ambiente:"ambos",preco:"450-550",nivel:"intermediario",desc:"Cítrico especiado vibrante",ano:2018},
+    {familia:"Cítrico",nome:"Montblanc Explorer",marca:"Montblanc",notas:"Bergamota, Sálvia, Vetiver",clima:"temperado",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Cítrico amadeirado versátil e acessível",ano:2019},
+    {familia:"Cítrico",nome:"Givenchy Gentleman Reserve Privée",marca:"Givenchy",notas:"Whisky, Bergamota, Iris",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Cítrico aromático com twist alcoólico",ano:2019},
+    {familia:"Cítrico",nome:"Acqua di Gio Profondo",marca:"Giorgio Armani",notas:"Bergamota, Alecrim Marinho, Almíscar",clima:"quente",ambiente:"aberto",preco:"450-550",nivel:"iniciante",desc:"Cítrico aquático profundo e refrescante",ano:2020},
+    {familia:"Cítrico",nome:"Paco Rabanne Phantom",marca:"Paco Rabanne",notas:"Limão, Lavanda, Baunilha",clima:"temperado",ambiente:"ambos",preco:"450-550",nivel:"iniciante",desc:"Cítrico aromático futurista",ano:2021},
+    {familia:"Cítrico",nome:"Boss Bottled Elixir",marca:"Hugo Boss",notas:"Cardamomo, Cedro, Vetiver",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Cítrico especiado intenso e moderno",ano:2023},
+
+    // ========== AMADEIRADO (10) ==========
+    {familia:"Amadeirado",nome:"Dior Sauvage Elixir",marca:"Dior",notas:"Canela, Noz-moscada, Lavanda",clima:"frio",ambiente:"fechado",preco:"700-800",nivel:"avancado",desc:"Amadeirado especiado ultra concentrado",ano:2021},
+    {familia:"Amadeirado",nome:"Bleu de Chanel Parfum",marca:"Chanel",notas:"Sândalo, Cedro, Almíscar",clima:"frio",ambiente:"fechado",preco:"700-900",nivel:"avancado",desc:"Amadeirado aromático premium intenso",ano:2018},
+    {familia:"Amadeirado",nome:"YSL Y Eau de Parfum",marca:"Yves Saint Laurent",notas:"Maçã, Gerânio, Cedro",clima:"temperado",ambiente:"ambos",preco:"500-600",nivel:"intermediario",desc:"Amadeirado frutado moderno",ano:2018},
+    {familia:"Amadeirado",nome:"Prada Luna Rossa Black",marca:"Prada",notas:"Angélica, Âmbar, Patchouli",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Amadeirado oriental sofisticado",ano:2017},
+    {familia:"Amadeirado",nome:"Giorgio Armani Code Absolu",marca:"Giorgio Armani",notas:"Maçã Verde, Mandarim, Tonka",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Amadeirado oriental sedutor intenso",ano:2019},
+    {familia:"Amadeirado",nome:"Carolina Herrera Bad Boy",marca:"Carolina Herrera",notas:"Pimenta, Cedro, Cacau",clima:"frio",ambiente:"ambos",preco:"450-550",nivel:"intermediario",desc:"Amadeirado especiado jovem e ousado",ano:2019},
+    {familia:"Amadeirado",nome:"Versace Dylan Blue Pour Homme",marca:"Versace",notas:"Cedro, Patchouli, Almíscar",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"iniciante",desc:"Amadeirado fougère moderno",ano:2016},
+    {familia:"Amadeirado",nome:"Azzaro The Most Wanted",marca:"Azzaro",notas:"Cardamomo, Toffee, Âmbar",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"intermediario",desc:"Amadeirado gourmand intenso",ano:2021},
+    {familia:"Amadeirado",nome:"Ralph Lauren Polo Red Extreme",marca:"Ralph Lauren",notas:"Cranberry, Café, Cedro",clima:"frio",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Amadeirado especiado energético",ano:2015},
+    {familia:"Amadeirado",nome:"Givenchy Gentleman Eau de Parfum Boisée",marca:"Givenchy",notas:"Cedro, Sândalo, Iris",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Amadeirado aromático elegante",ano:2020},
+
+    // ========== ORIENTAL (10) ==========
+    {familia:"Oriental",nome:"YSL La Nuit de L'Homme Bleu Électrique",marca:"Yves Saint Laurent",notas:"Cardamomo, Gerânio, Cedro",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Oriental especiado elétrico e sedutor",ano:2021},
+    {familia:"Oriental",nome:"Paco Rabanne 1 Million Parfum",marca:"Paco Rabanne",notas:"Damasco, Especiarias, Couro",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Oriental especiado rico e opulento",ano:2020},
+    {familia:"Oriental",nome:"Dolce & Gabbana The One Eau de Parfum",marca:"Dolce & Gabbana",notas:"Coentro, Gengibre, Tabaco",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Oriental especiado elegante intenso",ano:2015},
+    {familia:"Oriental",nome:"Valentino Uomo Intense",marca:"Valentino",notas:"Iris, Tonka, Baunilha",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Oriental talcado sofisticado intenso",ano:2016},
+    {familia:"Oriental",nome:"Paco Rabanne Pure XS",marca:"Paco Rabanne",notas:"Gengibre, Canela, Baunilha",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Oriental especiado sensual e intenso",ano:2017},
+    {familia:"Oriental",nome:"Jean Paul Gaultier Ultra Male",marca:"Jean Paul Gaultier",notas:"Pera, Canela, Baunilha",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Oriental frutado doce e sedutor",ano:2015},
+    {familia:"Oriental",nome:"Azzaro Wanted by Night",marca:"Azzaro",notas:"Canela, Tabaco, Âmbar",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"intermediario",desc:"Oriental especiado noturno intenso",ano:2018},
+    {familia:"Oriental",nome:"Carolina Herrera Bad Boy Cobalt",marca:"Carolina Herrera",notas:"Trufas, Gengibre, Cedro",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Oriental gourmand elétrico",ano:2021},
+    {familia:"Oriental",nome:"Emporio Armani Stronger With You Intensely",marca:"Giorgio Armani",notas:"Canela, Baunilha, Âmbar",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Oriental especiado quente e envolvente",ano:2019},
+    {familia:"Oriental",nome:"Montblanc Legend Spirit",marca:"Montblanc",notas:"Cardamomo, Lavanda, Almíscar",clima:"temperado",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Oriental aromático fresco e moderno",ano:2016},
+
+    // ========== FLORAL (10) ==========
+    {familia:"Floral",nome:"Dior Homme Intense",marca:"Dior",notas:"Iris, Lavanda, Pera",clima:"frio",ambiente:"fechado",preco:"600-700",nivel:"intermediario",desc:"Floral talcado luxuoso e sofisticado",ano:2020},
+    {familia:"Floral",nome:"Prada L'Homme Intense",marca:"Prada",notas:"Iris, Âmbar, Patchouli",clima:"frio",ambiente:"fechado",preco:"550-650",nivel:"intermediario",desc:"Floral talcado intenso e elegante",ano:2017},
+    {familia:"Floral",nome:"Valentino Uomo Born in Roma",marca:"Valentino",notas:"Gengibre, Sálvia, Vetiver",clima:"temperado",ambiente:"ambos",preco:"500-600",nivel:"intermediario",desc:"Floral aromático moderno e vibrante",ano:2019},
+    {familia:"Floral",nome:"Burberry Mr. Burberry Indigo",marca:"Burberry",notas:"Gerânio, Sálvia, Âmbar",clima:"temperado",ambiente:"aberto",preco:"450-550",nivel:"iniciante",desc:"Floral aromático fresco e clean",ano:2018},
+    {familia:"Floral",nome:"Boss Bottled Infinite",marca:"Hugo Boss",notas:"Manjericão, Sálvia, Cedro",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"iniciante",desc:"Floral aromático versátil e moderno",ano:2019},
+    {familia:"Floral",nome:"Givenchy Gentleman Cologne",marca:"Givenchy",notas:"Limão, Iris, Musgo",clima:"temperado",ambiente:"aberto",preco:"450-550",nivel:"iniciante",desc:"Floral cítrico fresco e elegante",ano:2019},
+    {familia:"Floral",nome:"Versace Pour Homme",marca:"Versace",notas:"Limão, Néroli, Cedro",clima:"temperado",ambiente:"aberto",preco:"350-450",nivel:"iniciante",desc:"Floral cítrico clássico renovado",ano:2023},
+    {familia:"Floral",nome:"Issey Miyake L'Eau d'Issey Pour Homme",marca:"Issey Miyake",notas:"Yuzu, Noz-moscada, Sândalo",clima:"temperado",ambiente:"aberto",preco:"350-450",nivel:"iniciante",desc:"Floral aquático clean e minimalista",ano:2015},
+    {familia:"Floral",nome:"Hermès Terre d'Hermès Eau Intense Vétiver",marca:"Hermès",notas:"Bergamota, Vetiver, Gerânio",clima:"temperado",ambiente:"ambos",preco:"600-700",nivel:"avancado",desc:"Floral amadeirado luxuoso intenso",ano:2018},
+    {familia:"Floral",nome:"Calvin Klein Eternity Intense",marca:"Calvin Klein",notas:"Gerânio, Lavanda, Vetiver",clima:"temperado",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Floral aromático atemporal intenso",ano:2019},
+
+    // ========== AQUÁTICO (10) ==========
+    {familia:"Aquático",nome:"Davidoff Cool Water Intense",marca:"Davidoff",notas:"Menta, Coco, Âmbar",clima:"quente",ambiente:"aberto",preco:"250-350",nivel:"iniciante",desc:"Aquático intenso refrescante e acessível",ano:2019},
+    {familia:"Aquático",nome:"Bvlgari Aqva Pour Homme Atlantiqve",marca:"Bvlgari",notas:"Calabresa, Sândalo, Patchouli",clima:"temperado",ambiente:"aberto",preco:"450-550",nivel:"intermediario",desc:"Aquático amadeirado marinho sofisticado",ano:2017},
+    {familia:"Aquático",nome:"Giorgio Armani Acqua di Giò Profumo",marca:"Giorgio Armani",notas:"Bergamota, Gerânio, Incenso",clima:"temperado",ambiente:"ambos",preco:"500-600",nivel:"intermediario",desc:"Aquático aromático intenso e elegante",ano:2015},
+    {familia:"Aquático",nome:"Issey Miyake Nuit d'Issey",marca:"Issey Miyake",notas:"Bergamota, Especiarias, Patchouli",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"intermediario",desc:"Aquático amadeirado noturno",ano:2015},
+    {familia:"Aquático",nome:"Lacoste L'Homme Intense",marca:"Lacoste",notas:"Toranja, Âmbar, Cedro",clima:"temperado",ambiente:"aberto",preco:"300-400",nivel:"iniciante",desc:"Aquático amadeirado esportivo intenso",ano:2017},
+    {familia:"Aquático",nome:"Nautica Voyage N-83",marca:"Nautica",notas:"Limão, Sálvia, Âmbar",clima:"quente",ambiente:"aberto",preco:"150-250",nivel:"iniciante",desc:"Aquático aromático acessível e versátil",ano:2015},
+    {familia:"Aquático",nome:"Azzaro Chrome Aqua",marca:"Azzaro",notas:"Toranja, Especiarias, Vetiver",clima:"quente",ambiente:"aberto",preco:"300-400",nivel:"iniciante",desc:"Aquático especiado refrescante",ano:2017},
+    {familia:"Aquático",nome:"Perry Ellis Aqua Extreme",marca:"Perry Ellis",notas:"Bergamota, Pepino, Âmbar",clima:"quente",ambiente:"aberto",preco:"150-250",nivel:"iniciante",desc:"Aquático fresco extremo e acessível",ano:2019},
+    {familia:"Aquático",nome:"Salvatore Ferragamo Acqua Essenziale Blu",marca:"Salvatore Ferragamo",notas:"Cardamomo, Cipreste, Patchouli",clima:"temperado",ambiente:"aberto",preco:"350-450",nivel:"iniciante",desc:"Aquático amadeirado elegante",ano:2015},
+    {familia:"Aquático",nome:"Givenchy Gentleman Only Absolute",marca:"Givenchy",notas:"Coco, Mirra, Patchouli",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Aquático amadeirado luxuoso intenso",ano:2015},
+
+    // ========== FOUGÈRE (9) ==========
+    {familia:"Fougère",nome:"Giorgio Armani Acqua di Giò Absolu",marca:"Giorgio Armani",notas:"Bergamota, Gerânio, Patchouli",clima:"temperado",ambiente:"ambos",preco:"500-600",nivel:"intermediario",desc:"Fougère aromático absoluto e intenso",ano:2018},
+    {familia:"Fougère",nome:"YSL Y Le Parfum",marca:"Yves Saint Laurent",notas:"Maçã, Lavanda, Cedro",clima:"frio",ambiente:"fechado",preco:"550-650",nivel:"intermediario",desc:"Fougère amadeirado intenso e moderno",ano:2021},
+    {familia:"Fougère",nome:"Azzaro Wanted",marca:"Azzaro",notas:"Limão, Menta, Tonka",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"iniciante",desc:"Fougère especiado vibrante e sedutor",ano:2016},
+    {familia:"Fougère",nome:"Montblanc Legend",marca:"Montblanc",notas:"Bergamota, Lavanda, Tonka",clima:"temperado",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Fougère aromático versátil e acessível",ano:2015},
+    {familia:"Fougère",nome:"Ralph Lauren Polo Blue Eau de Parfum",marca:"Ralph Lauren",notas:"Melão, Manjericão, Almíscar",clima:"temperado",ambiente:"aberto",preco:"400-500",nivel:"iniciante",desc:"Fougère aquático fresco intenso",ano:2016},
+    {familia:"Fougère",nome:"Burberry Touch for Men",marca:"Burberry",notas:"Artemísia, Cedro, Musgo Branco",clima:"temperado",ambiente:"ambos",preco:"350-450",nivel:"iniciante",desc:"Fougère amadeirado clean e elegante",ano:2015},
+    {familia:"Fougère",nome:"Lancôme L'Homme Idéal",marca:"Lancôme",notas:"Amêndoa, Couro, Tonka",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Fougère gourmand sofisticado",ano:2015},
+    {familia:"Fougère",nome:"Guess Seductive Homme",marca:"Guess",notas:"Cardamomo, Vetiver, Âmbar",clima:"temperado",ambiente:"ambos",preco:"250-350",nivel:"iniciante",desc:"Fougère especiado sedutor acessível",ano:2015},
+    {familia:"Fougère",nome:"Kenneth Cole Mankind Hero",marca:"Kenneth Cole",notas:"Gengibre, Castanha, Baunilha",clima:"frio",ambiente:"fechado",preco:"200-300",nivel:"iniciante",desc:"Fougère especiado heroico e acessível",ano:2019},
+
+    // ========== ESPECIADO (10) ==========
+    {familia:"Especiado",nome:"Viktor & Rolf Spicebomb Extreme",marca:"Viktor & Rolf",notas:"Canela, Tabaco, Baunilha",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"avancado",desc:"Especiado explosivo ultra intenso",ano:2015},
+    {familia:"Especiado",nome:"Dior Fahrenheit Parfum",marca:"Dior",notas:"Violeta, Couro, Baunilha",clima:"frio",ambiente:"fechado",preco:"600-700",nivel:"avancado",desc:"Especiado couro luxuoso intenso",ano:2015},
+    {familia:"Especiado",nome:"Yves Saint Laurent L'Homme Ultime",marca:"Yves Saint Laurent",notas:"Bergamota, Cardamomo, Cedro",clima:"temperado",ambiente:"ambos",preco:"500-600",nivel:"intermediario",desc:"Especiado aromático definitivo",ano:2016},
+    {familia:"Especiado",nome:"Paco Rabanne 1 Million Privé",marca:"Paco Rabanne",notas:"Laranja Sanguínea, Mirra, Tonka",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Especiado privado luxuoso e intenso",ano:2016},
+    {familia:"Especiado",nome:"Carolina Herrera Bad Boy Le Parfum",marca:"Carolina Herrera",notas:"Bergamota, Pimenta, Cacau",clima:"frio",ambiente:"fechado",preco:"550-650",nivel:"intermediario",desc:"Especiado intenso ousado e moderno",ano:2022},
+    {familia:"Especiado",nome:"Givenchy Pi Neo",marca:"Givenchy",notas:"Bergamota, Anis, Patchouli",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"intermediario",desc:"Especiado aromático futurista",ano:2015},
+    {familia:"Especiado",nome:"Boss Bottled Oud",marca:"Hugo Boss",notas:"Cidra, Canela, Oud",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"avancado",desc:"Especiado oriental com oud",ano:2015},
+    {familia:"Especiado",nome:"Armaf Club de Nuit Intense Man",marca:"Armaf",notas:"Limão, Pimenta Rosa, Âmbar",clima:"frio",ambiente:"fechado",preco:"150-250",nivel:"iniciante",desc:"Especiado intenso acessível e potente",ano:2015},
+    {familia:"Especiado",nome:"Azzaro Most Wanted Parfum",marca:"Azzaro",notas:"Cardamomo, Bourbon, Âmbar",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Especiado gourmand mais procurado",ano:2022},
+    {familia:"Especiado",nome:"John Varvatos Artisan Acqua",marca:"John Varvatos",notas:"Charneca, Lavanda, Laranja",clima:"temperado",ambiente:"aberto",preco:"350-450",nivel:"intermediario",desc:"Especiado aromático artesanal aquático",ano:2015},
+
+    // ========== COURO (10) ==========
+    {familia:"Couro",nome:"Dior Fahrenheit Le Parfum",marca:"Dior",notas:"Violeta, Couro Suede, Baunilha",clima:"frio",ambiente:"fechado",preco:"650-750",nivel:"avancado",desc:"Couro violeta luxuoso e icônico",ano:2015},
+    {familia:"Couro",nome:"Hermès Terre d'Hermès Parfum",marca:"Hermès",notas:"Toranja, Sílex, Cedro",clima:"temperado",ambiente:"fechado",preco:"700-800",nivel:"avancado",desc:"Couro mineral terroso e sofisticado",ano:2015},
+    {familia:"Couro",nome:"Gucci Guilty Absolute Pour Homme",marca:"Gucci",notas:"Couro, Cipreste, Patchouli",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"avancado",desc:"Couro absoluto intenso e ousado",ano:2017},
+    {familia:"Couro",nome:"Tom Ford Ombré Leather",marca:"Tom Ford",notas:"Cardamomo, Couro, Patchouli",clima:"frio",ambiente:"fechado",preco:"800-1000",nivel:"avancado",desc:"Couro sensual luxuoso premium",ano:2018},
+    {familia:"Couro",nome:"Bentley for Men Intense",marca:"Bentley",notas:"Rum, Couro, Âmbar",clima:"frio",ambiente:"fechado",preco:"300-400",nivel:"intermediario",desc:"Couro alcoólico intenso e potente",ano:2015},
+    {familia:"Couro",nome:"Dunhill Icon Absolute",marca:"Dunhill",notas:"Bergamota, Couro, Oud",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"avancado",desc:"Couro oud absoluto elegante",ano:2017},
+    {familia:"Couro",nome:"Montblanc Legend Night",marca:"Montblanc",notas:"Bergamota, Couro, Cedro",clima:"frio",ambiente:"fechado",preco:"350-450",nivel:"intermediario",desc:"Couro noturno aromático moderno",ano:2017},
+    {familia:"Couro",nome:"Jaguar Classic Black",marca:"Jaguar",notas:"Maçã, Couro, Tonka",clima:"frio",ambiente:"fechado",preco:"150-250",nivel:"iniciante",desc:"Couro clássico acessível e potente",ano:2015},
+    {familia:"Couro",nome:"Azzaro Wanted by Night",marca:"Azzaro",notas:"Canela, Couro, Tabaco",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"intermediario",desc:"Couro especiado noturno sedutor",ano:2018},
+    {familia:"Couro",nome:"Zadig & Voltaire This is Him!",marca:"Zadig & Voltaire",notas:"Toranja, Incenso, Baunilha",clima:"frio",ambiente:"fechado",preco:"350-450",nivel:"intermediario",desc:"Couro incensado rock e moderno",ano:2016},
+
+    // ========== GOURMAND (10) ==========
+    {familia:"Gourmand",nome:"Paco Rabanne Invictus Legend",marca:"Paco Rabanne",notas:"Laranja Sanguínea, Louro, Âmbar",clima:"frio",ambiente:"fechado",preco:"450-550",nivel:"intermediario",desc:"Gourmand especiado lendário",ano:2019},
+    {familia:"Gourmand",nome:"Jean Paul Gaultier Le Male Le Parfum",marca:"Jean Paul Gaultier",notas:"Cardamomo, Iris, Baunilha",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Gourmand oriental intenso e sedutor",ano:2020},
+    {familia:"Gourmand",nome:"Mugler A*Men Kryptomint",marca:"Mugler",notas:"Menta, Café, Cacau",clima:"temperado",ambiente:"ambos",preco:"400-500",nivel:"avancado",desc:"Gourmand mentolado cripto intenso",ano:2018},
+    {familia:"Gourmand",nome:"Azzaro Wanted Tonic",marca:"Azzaro",notas:"Toranja, Gengibre, Âmbar",clima:"quente",ambiente:"aberto",preco:"400-500",nivel:"iniciante",desc:"Gourmand tônico refrescante vibrante",ano:2021},
+    {familia:"Gourmand",nome:"Dolce & Gabbana The One Royal Night",marca:"Dolce & Gabbana",notas:"Cardamomo, Damasco, Tabaco",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Gourmand real noturno luxuoso",ano:2015},
+    {familia:"Gourmand",nome:"Givenchy Pi",marca:"Givenchy",notas:"Baunilha, Âmbar, Benzoin",clima:"frio",ambiente:"fechado",preco:"400-500",nivel:"intermediario",desc:"Gourmand matemático envolvente",ano:2015},
+    {familia:"Gourmand",nome:"Prada Candy Night",marca:"Prada",notas:"Laranja Amarga, Chocolate, Tonka",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Gourmand noturno achocolatado intenso",ano:2019},
+    {familia:"Gourmand",nome:"Valentino Uomo Noir Absolu",marca:"Valentino",notas:"Bergamota, Café, Baunilha",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Gourmand café absoluto sofisticado",ano:2018},
+    {familia:"Gourmand",nome:"Armani Code Profumo",marca:"Giorgio Armani",notas:"Cardamomo, Âmbar, Tonka",clima:"frio",ambiente:"fechado",preco:"500-600",nivel:"intermediario",desc:"Gourmand oriental profundo intenso",ano:2016},
+    {familia:"Gourmand",nome:"Carolina Herrera Bad Boy Cobalt Elixir",marca:"Carolina Herrera",notas:"Pluma, Café, Cedro",clima:"frio",ambiente:"fechado",preco:"550-650",nivel:"intermediario",desc:"Gourmand elixir cobalto ultra intenso",ano:2023}
+];
+// Calcular score de match
+function calculatePerfumeScore(perfume, userProfile) {
+    let score = 0;
+    
+    // 1. Família olfativa (peso 40% com prioridade)
+    const familiaIndex = userProfile.familias.indexOf(perfume.familia);
+    if (familiaIndex !== -1) {
+        // Família encontrada! Dar mais pontos para famílias prioritárias
+        if (familiaIndex === 0) {
+            score += 40; // Prioridade 1
+        } else if (familiaIndex === 1) {
+            score += 30; // Prioridade 2
+        } else if (familiaIndex === 2) {
+            score += 20; // Prioridade 3
+        } else {
+            score += 10; // Outras famílias
+        }
+    }
+    
+    // 2. Clima (peso 30%)
+    const climaMatch = {
+        'quente': ['quente', 'temperado'],
+        'temperado': ['temperado', 'quente', 'frio'],
+        'frio': ['frio', 'temperado']
+    };
+    
+    if (climaMatch[userProfile.clima] && climaMatch[userProfile.clima].includes(perfume.clima)) {
+        score += 30;
+    }
+    
+    // 3. Ambiente (peso 20%)
+    if (perfume.ambiente === 'ambos' || perfume.ambiente === userProfile.ambiente) {
+        score += 20;
+    }
+    
+    // 4. Nível (peso 10%)
+    if (perfume.nivel === userProfile.nivel) {
+        score += 10;
+    }
+    
+    return score;
+}
+
+// Obter top 3 recomendações
+function getTop3Recommendations(userProfile) {
+    console.log('🔍 Iniciando busca de recomendações...');
+    console.log('👤 Perfil do usuário:', userProfile);
+    
+    // Calcular score para cada perfume
+    const scored = PERFUMES_DATABASE.map(perfume => {
+        const perfumeScore = calculatePerfumeScore(perfume, userProfile);
+        return {
+            ...perfume,
+            score: perfumeScore
+        };
+    });
+    
+    // ============================================
+    // RANDOMIZAR PERFUMES COM MESMO SCORE
+    // ============================================
+    // Agrupar por score
+    const scoreGroups = {};
+    scored.forEach(p => {
+        if (!scoreGroups[p.score]) {
+            scoreGroups[p.score] = [];
+        }
+        scoreGroups[p.score].push(p);
+    });
+    
+    // Embaralhar cada grupo
+    Object.keys(scoreGroups).forEach(score => {
+        const group = scoreGroups[score];
+        // Fisher-Yates shuffle
+        for (let i = group.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [group[i], group[j]] = [group[j], group[i]];
+        }
+    });
+    
+    // Reconstruir array ordenado com grupos embaralhados
+    const shuffledScored = Object.keys(scoreGroups)
+        .map(Number)
+        .sort((a, b) => b - a)
+        .flatMap(score => scoreGroups[score]);
+    
+    console.log('🎲 Perfumes randomizados por score igual');
+    
+    console.log('🏆 Top 10 perfumes por score:', shuffledScored.slice(0, 10).map(p => ({
+        nome: p.nome,
+        familia: p.familia,
+        score: p.score,
+        clima: p.clima,
+        ambiente: p.ambiente
+    })));
+    
+    // ============================================
+    // GARANTIR QUE #1 SEJA DA FAMÍLIA PRIORITÁRIA (P1)
+    // ============================================
+    
+    const familiaPrioritaria = userProfile.familias[0]; // P1
+    
+    console.log('🎯 Família prioritária (P1):', familiaPrioritaria);
+    
+    // Filtrar apenas perfumes da família P1
+    const perfumesDaP1 = shuffledScored.filter(p => p.familia === familiaPrioritaria);
+    
+    console.log(`✅ Encontrados ${perfumesDaP1.length} perfumes da família ${familiaPrioritaria}`);
+    
+    if (perfumesDaP1.length === 0) {
+        console.warn('⚠️ ATENÇÃO: Nenhum perfume encontrado da família P1! Usando ranking geral.');
+        // Fallback: usar ranking geral se não houver perfumes da P1
+        const top3 = shuffledScored.slice(0, 3);
+        console.log('✅ Top 3 selecionados (fallback):', top3.map(p => `${p.nome} (${p.score} pts)`));
+        return top3;
+    }
+    
+    // #1 = Melhor perfume da família P1
+    const primeiro = perfumesDaP1[0];
+    
+    console.log(`🏆 #1 GARANTIDO da P1: ${primeiro.nome} (${primeiro.familia}) - ${primeiro.score} pts`);
+    
+    // Para #2 e #3, pegar do ranking geral (mas excluir o #1)
+    const remaining = shuffledScored.filter(p => p.nome !== primeiro.nome);
+    const segundo = remaining[0];
+    const terceiro = remaining[1];
+    
+    const top3 = [primeiro, segundo, terceiro];
+    
+    console.log('✅ Top 3 selecionados:', top3.map(p => `${p.nome} (${p.familia}) - ${p.score} pts`));
+    
+    return top3;
+}
+
+// Gerar HTML do card de perfume
+function generatePerfumeCard(perfume, position, isBlurred) {
+    const positionColors = {
+        1: { color: '#ff6b6b', label: '🏆 SUA MELHOR ESCOLHA' },
+        2: { color: '#4ecdc4', label: '🥈 SEGUNDA OPÇÃO' },
+        3: { color: '#95e1d3', label: '🥉 TERCEIRA OPÇÃO' }
+    };
+    
+    const posConfig = positionColors[position];
+    
+    if (isBlurred) {
+        return `
+            <div style="
+                filter: blur(8px);
+                user-select: none;
+                pointer-events: none;
+                opacity: 0.6;
+            ">
+                <div style="color: ${posConfig.color}; font-size: 0.85em; font-weight: 700; margin-bottom: 8px;">
+                    ${posConfig.label}
+                </div>
+                <div style="color: #fff; font-size: 1.1em; font-weight: 600; margin-bottom: 8px;">
+                    ${perfume.nome}
+                </div>
+                <div style="color: #ccc; font-size: 0.9em; margin-bottom: 8px;">
+                    ${perfume.marca}
+                </div>
+                <div style="color: #aaa; font-size: 0.85em; margin-bottom: 5px;">
+                    🎵 ${perfume.notas}
+                </div>
+                <div style="color: #888; font-size: 0.8em;">
+                    💰 R$ ${perfume.preco}
+                </div>
+            </div>
+        `;
+    }
+    
+    return `
+        <div style="margin-bottom: 20px;">
+            <div style="color: ${posConfig.color}; font-size: 0.85em; font-weight: 700; margin-bottom: 8px;">
+                ${posConfig.label}
+            </div>
+            <div style="color: #fff; font-size: 1.1em; font-weight: 600; margin-bottom: 8px;">
+                ${perfume.nome}
+            </div>
+            <div style="color: #ccc; font-size: 0.9em; margin-bottom: 8px;">
+                ${perfume.marca}
+            </div>
+            <div style="color: #aaa; font-size: 0.85em; margin-bottom: 5px; line-height: 1.4;">
+                🎵 ${perfume.notas}
+            </div>
+            <div style="color: #888; font-size: 0.8em; margin-bottom: 5px;">
+                💰 R$ ${perfume.preco}
+            </div>
+            <div style="color: #999; font-size: 0.8em; line-height: 1.4; font-style: italic;">
+                ${perfume.desc}
+            </div>
+        </div>
+    `;
+}
+
+// Mapeamento entre famílias do diagnóstico e banco de dados
+const FAMILIA_MAPPING = {
+    'fresco': 'Cítrico',
+    'aromatico': 'Fougère',
+    'doce': 'Gourmand',
+    'amadeirado': 'Amadeirado',
+    'especiado': 'Especiado',
+    'aquatico': 'Aquático',
+    'talco': 'Fougère',
+    'floral': 'Floral',
+    'frutas': 'Oriental'
+};
+
+// Mapeamento REVERSO: Converter valores simples para nomes completos com emojis
+const FAMILIA_NOME_COMPLETO = {
+    'Cítrico': '🍋 Fresco/Cítrico',
+    'Fougère': '🌿 Aromático/Verde',
+    'Gourmand': '🍯 Doce/Gourmand',
+    'Amadeirado': '🪵 Amadeirado',
+    'Especiado': '🔥 Especiado/Oriental',
+    'Aquático': '🌊 Aquático',
+    'Floral': '🌸 Floral',
+    'Oriental': '🍓 Frutas'
+};
+
+const CLIMA_MAPPING = {
+    'quente': 'quente',
+    'temperado': 'temperado',
+    'frio': 'frio'
+};
+
+const NIVEL_MAPPING = {
+    'INICIANTE': 'iniciante',
+    'INICIANTE/INTERMEDIÁRIO': 'intermediario',
+    'INTERMEDIÁRIO': 'intermediario',
+    'AVANÇADO': 'avancado'
+};
+
+// Gerar bloco de sugestões personalizado
+function generateRecommendationsBlock(checkboxes, climaRegiao, ambiente, level) {
+    // Pegar checkboxes na ordem de clique
+    const checkboxesOrdenados = getCheckboxesInClickOrder();
+    
+    // Capturar famílias selecionadas NA ORDEM DE CLIQUE
+    const familiasSelecionadasKeys = [];
+    checkboxesOrdenados.forEach(cb => {
+        const familiaKey = cb.dataset.familia;
+        if (FAMILIA_MAPPING[familiaKey]) {
+            familiasSelecionadasKeys.push(FAMILIA_MAPPING[familiaKey]);
+        }
+    });
+    
+    console.log('🔢 Ordem de clique:', familiaClickOrder);
+    console.log('✅ Famílias selecionadas (ordenadas):', familiasSelecionadasKeys);
+    
+    // Criar perfil do usuário
+    const userProfile = {
+        familias: familiasSelecionadasKeys,
+        clima: CLIMA_MAPPING[climaRegiao] || 'temperado',
+        ambiente: ambiente || 'fechado',
+        nivel: NIVEL_MAPPING[level] || 'intermediario'
+    };
+    
+    console.log('👤 Perfil do usuário:', userProfile);
+    
+    // Obter top 3 recomendações
+    const top3 = getTop3Recommendations(userProfile);
+    
+    console.log('🎯 Top 3 sugestões:', top3);
+    
+    // Gerar HTML
+    return `
+        <div style="
+            background: linear-gradient(135deg, rgba(80, 80, 80, 0.3), rgba(50, 50, 50, 0.2));
+            border: 3px solid rgba(212, 175, 55, 0.6);
+            border-radius: 15px;
+            padding: 25px;
+        ">
+            <div style="color: #d4af37; font-size: 1.3em; font-weight: 700; margin-bottom: 8px;">
+                🎯 SUAS SUGESTÕES PERSONALIZADAS
+            </div>
+            
+            <div style="color: #fff; font-size: 1.3em; font-weight: 700; margin-bottom: 15px; text-align: center;">
+                Sugestão 1 de 3
+            </div>
+            
+            ${generatePerfumeCard(top3[0], 1, false)}
+            
+            <!-- Sugestões #2 e #3 - Embaixo dos CTAs (sem ocupar espaço) -->
+            <div style="position: relative;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; z-index: 1;">
+                    ${generatePerfumeCard(top3[1], 2, true)}
+                </div>
+                
+                <div style="position: absolute; top: 80px; left: 0; right: 0; z-index: 1;">
+                    ${generatePerfumeCard(top3[2], 3, true)}
+                </div>
+            
+            <!-- ====================================== -->
+            <!-- COPYS DE VENDAS (POR CIMA DAS SUGESTÕES) -->
+            <!-- ====================================== -->
+            
+            <div style="position: relative; z-index: 10; background: linear-gradient(135deg, rgba(50, 50, 50, 0.98), rgba(40, 40, 40, 0.98)); padding: 15px; border-radius: 12px; margin-top: 10px; min-height: 600px;">
+            
+            <!-- 1. AGITAÇÃO (RENTE ÀS SUGESTÕES) -->
+            <div style="
+                background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+                border: 2px solid rgba(255, 107, 107, 0.3);
+                border-radius: 12px;
+                padding: 20px;
+                margin: 0 0 15px;
+                text-align: center;
+            ">
+                <div style="font-size: 1.8em; margin-bottom: 10px;">⚠️</div>
+                <p style="color: #fff; font-size: 1.05em; line-height: 1.6; margin: 0; font-weight: 500;">
+                    Você está vendo apenas <strong style="color: #ff6b6b;">1 de 3 sugestões</strong> personalizadas.<br>
+                    E se ela não estiver disponível? E se você quiser uma opção diferente?
+                </p>
+            </div>
+            
+            <!-- 2. CTA PRINCIPAL (LOGO ABAIXO DO BOX VERMELHO) -->
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="https://pay.hotmart.com/M103540661D?checkoutMode=10" target="_blank" rel="noopener noreferrer" onclick="trackCTAClick('Mapa Completo IA'); return true;"
+                   style="
+                       display: inline-block;
+                       background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                       color: #000;
+                       padding: 18px 40px;
+                       text-decoration: none;
+                       border-radius: 12px;
+                       font-weight: 700;
+                       font-size: 1.1em;
+                       box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+                       transition: all 0.3s;
+                       text-transform: uppercase;
+                       letter-spacing: 0.5px;
+                   "
+                   onmouseover="this.style.transform='translateY(-4px) scale(1.03)'; this.style.boxShadow='0 12px 35px rgba(212, 175, 55, 0.8)'"
+                   onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(212, 175, 55, 0.6)'"
+                >
+                    🔓 QUERO DESBLOQUEAR AGORA
+                </a>
+            </div>
+            
+            <!-- 3. BENEFÍCIOS + GARANTIA (LADO A LADO) -->
+            <div style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin: 20px 0;
+            ">
+                <!-- BENEFÍCIOS (ESQUERDA) -->
+                <div style="
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 2px solid rgba(212, 175, 55, 0.3);
+                    border-radius: 10px;
+                    padding: 20px;
+                ">
+                    <div style="font-size: 1.5em; margin-bottom: 10px; text-align: center;">🎁</div>
+                    <h4 style="color: #d4af37; margin: 0 0 15px; font-size: 1.1em; text-align: center; font-weight: 700;">
+                        Você vai receber:
+                    </h4>
+                    <div style="color: #ccc; font-size: 0.9em; line-height: 1.8;">
+                        ✅ 3 Sugestões Personalizadas<br>
+                        ✅ O Perfumista - I.A. 24h<br>
+                        ✅ Guia de Famílias Olfativas<br>
+                        ✅ Boas Práticas de Aplicação
+                    </div>
+                </div>
+                
+                <!-- GARANTIA (DIREITA) -->
+                <div style="
+                    background: linear-gradient(135deg, rgba(78, 205, 196, 0.12) 0%, rgba(78, 205, 196, 0.04) 100%);
+                    border: 2px solid rgba(78, 205, 196, 0.35);
+                    border-radius: 10px;
+                    padding: 20px;
+                ">
+                    <div style="font-size: 1.5em; margin-bottom: 10px; text-align: center;">🛡️</div>
+                    <h4 style="color: #4ecdc4; margin: 0 0 15px; font-size: 1.1em; text-align: center; font-weight: 700;">
+                        Garantia de 7 Dias
+                    </h4>
+                    <div style="color: #fff; font-size: 0.9em; line-height: 1.8; text-align: center;">
+                        Se não gostar, devolvemos <strong style="color: #4ecdc4;">100% do dinheiro</strong>.<br>
+                        <span style="color: #ccc; font-size: 0.85em;">Sem perguntas.<br>Sem burocracia.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 4. COMPARAÇÃO (ANTES vs DEPOIS) -->
+            <div style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin: 20px 0;
+            ">
+                <!-- SEM -->
+                <div style="
+                    background: rgba(255, 107, 107, 0.08);
+                    border: 2px solid rgba(255, 107, 107, 0.25);
+                    border-radius: 10px;
+                    padding: 18px 15px;
+                ">
+                    <div style="font-size: 1.3em; margin-bottom: 8px; text-align: center;">🔴</div>
+                    <h4 style="color: #ff6b6b; margin: 0 0 12px; font-size: 1em; text-align: center; font-weight: 700;">
+                        SEM O MAPA
+                    </h4>
+                    <div style="color: #ccc; font-size: 0.85em; line-height: 1.6;">
+                        ❌ Não sabe quando usar<br>
+                        ❌ Desperdiça tempo testando<br>
+                        ❌ Gasta R$ 500+ errado<br>
+                        ❌ Compra sem orientação
+                    </div>
+                </div>
+                
+                <!-- COM -->
+                <div style="
+                    background: linear-gradient(135deg, rgba(78, 205, 196, 0.12) 0%, rgba(78, 205, 196, 0.04) 100%);
+                    border: 2px solid rgba(78, 205, 196, 0.35);
+                    border-radius: 10px;
+                    padding: 18px 15px;
+                ">
+                    <div style="font-size: 1.3em; margin-bottom: 8px; text-align: center;">🟢</div>
+                    <h4 style="color: #4ecdc4; margin: 0 0 12px; font-size: 1em; text-align: center; font-weight: 700;">
+                        COM O MAPA
+                    </h4>
+                    <div style="color: #fff; font-size: 0.85em; line-height: 1.6; font-weight: 500;">
+                        ✅ Sabe qual usar e quando<br>
+                        ✅ Economiza tempo e dinheiro<br>
+                        ✅ Compra o certo de primeira<br>
+                        ✅ I.A. 24h ao seu lado
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 5. CTA SECUNDÁRIO (AMARELO) -->
+            <div style="text-align: center; margin: 25px 0 30px;">
+                <a href="https://pay.hotmart.com/M103540661D?checkoutMode=10" target="_blank" rel="noopener noreferrer" onclick="trackCTAClick('Mapa Completo IA - CTA2'); return true;"
+                   style="
+                       display: inline-block;
+                       background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                       color: #000;
+                       padding: 16px 40px;
+                       text-decoration: none;
+                       border-radius: 10px;
+                       font-weight: 700;
+                       font-size: 1em;
+                       box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+                       transition: all 0.3s;
+                       text-transform: uppercase;
+                   "
+                   onmouseover="this.style.transform='translateY(-3px) scale(1.03)'"
+                   onmouseout="this.style.transform='translateY(0) scale(1)'"
+                >
+                    🚀 SIM, QUERO MEU ACESSO AGORA
+                </a>
+            </div>
+            
+            </div> <!-- Fecha div com z-index por cima -->
+            </div> <!-- Fecha position relative -->
+            
+            <!-- Responsividade Mobile -->
+            <style>
+                @media (max-width: 768px) {
+                    [style*="grid-template-columns: 1fr 1fr"] {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            </style>
+            
+        </div>
+    `;
+}
+        // Armazenar respostas do quiz
+        const quizAnswers = {
+            q1: null,
+            q2: null,
+            q3: null
+        };
+
+        function selectOption(question, value, button) {
+            // Salvar resposta
+            quizAnswers[`q${question}`] = value;
+            
+            // Remover seleção de todos os botões da mesma pergunta
+            const allButtons = button.parentElement.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => btn.classList.remove('selected'));
+            
+            // Selecionar botão clicado
+            button.classList.add('selected');
+            
+            // Habilitar botão "Próxima"
+            const nextBtn = document.getElementById(`next-${question}`);
+            nextBtn.classList.add('enabled');
+        }
+
+        function nextQuestion(current) {
+            // ENVIAR DADOS DA PERGUNTA ATUAL
+            const etapa = `Pergunta ${current}`;
+            const resposta = quizAnswers[`q${current}`];
+            
+            sendToSheet({
+                etapa: etapa,
+                q1: quizAnswers.q1,
+                q2: quizAnswers.q2,
+                q3: quizAnswers.q3,
+                status: 'Em andamento'
+            });
+            
+            // Esconder pergunta atual
+            document.getElementById(`quiz-${current}`).classList.remove('active');
+            
+            // Mostrar próxima pergunta
+            const next = current + 1;
+            document.getElementById(`quiz-${next}`).classList.add('active');
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function comecarDiagnostico() {
+            // Esconder hero section
+            document.getElementById('hero-section').classList.remove('active');
+            
+            // Mostrar quiz-1
+            document.getElementById('quiz-1').classList.add('active');
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Track evento
+            trackEvent('iniciar_diagnostico_hero');
+            console.log('✅ Usuário escolheu "Melhorar Coleção" - Iniciando quiz');
+        }
+
+        function startDiagnostic() {
+            // Salvar respostas do quiz no localStorage
+            localStorage.setItem('quiz_answers', JSON.stringify(quizAnswers));
+            
+            // ENVIAR DADOS: Completou Quiz
+            sendToSheet({
+                etapa: 'Quiz Completo',
+                q1: quizAnswers.q1,
+                q2: quizAnswers.q2,
+                q3: quizAnswers.q3,
+                status: 'Iniciou Diagnóstico'
+            });
+            
+            // Esconder quiz
+            document.getElementById('quiz-3').style.display = 'none';
+            
+            // Mostrar seção de diagnóstico
+            document.getElementById('diagnostic-section').style.display = 'block';
+            
+            // Scroll para o topo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwVsf5BS_uSNmcGHzM8NTXlhquBXQ7qwejle6NpB7g4rUfdXnIkGrqW937ZeOXp9xQ/exec';
+
+        // Função para enviar dados ao Google Sheets
+        function sendToSheet(data) {
+            fetch(SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).catch(error => console.log('Dados enviados'));
+        }
+
+
+        // Analisar coleção com loading
+        function analyzeCollection() {
+            // VALIDAR AMBIENTE OBRIGATÓRIO
+            const ambiente = document.getElementById('ambiente').value;
+            if (!ambiente || ambiente === '') {
+                alert('⚠️ Por favor, selecione seu ambiente de trabalho!');
+                document.getElementById('ambiente').focus();
+                return;
+            }
+            
+            // VALIDAR CLIMA OBRIGATÓRIO
+            const climaSelecionado = document.querySelector('.clima-btn.selected-quente, .clima-btn.selected-temperado, .clima-btn.selected-frio');
+            if (!climaSelecionado) {
+                alert('⚠️ Por favor, selecione o clima da sua região!');
+                return;
+            }
+            
+            
+            
+            // Coletar famílias marcadas (checkboxes)
+            const checkboxes = document.querySelectorAll('.familia-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Marque pelo menos 1 família para analisar');
+                return;
+            }
+            
+            // Criar objeto families baseado nas checkboxes marcadas
+            // Primeira marcada = valor mais alto (dominante)
+            // Segunda = valor médio
+            // Terceira = valor menor
+            const families = {
+                'fresco': { name: '🍋 Fresco/Cítrico', value: 0 },
+                'aromatico': { name: '🌿 Aromático/Verde', value: 0 },
+                'doce': { name: '🍯 Doce/Gourmand', value: 0 },
+                'amadeirado': { name: '🪵 Amadeirado', value: 0 },
+                'especiado': { name: '🔥 Especiado/Oriental', value: 0 },
+                'aquatico': { name: '🌊 Aquático', value: 0 },
+                'talco': { name: '🧼 Talco/Fougère', value: 0 },
+                'floral': { name: '🌸 Floral', value: 0 },
+                'frutas': { name: '🍓 Frutas', value: 0 }
+            };
+            
+            // Atribuir valores baseado na ordem de seleção
+            checkboxes.forEach((checkbox, index) => {
+                const familia = checkbox.dataset.familia;
+                if (index === 0) {
+                    families[familia].value = 10; // Dominante
+                } else if (index === 1) {
+                    families[familia].value = 5; // Segunda
+                } else if (index === 2) {
+                    families[familia].value = 3; // Terceira
+                }
+            });
+            
+            const total = checkboxes.length * 6; // Simular total de perfumes
+
+            // MOSTRAR POPUP DE LOADING
+            mostrarLoading();
+
+            // Simular processamento por 2.5 segundos
+            setTimeout(() => {
+                fecharLoading();
+                processarAnalise(families, total);
+            }, 2500);
+        }
+
+        function mostrarLoading() {
+            const overlay = document.createElement('div');
+            overlay.id = 'loading-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            overlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                    border: 3px solid #d4af37;
+                    border-radius: 20px;
+                    padding: 50px 60px;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
+                    animation: slideUp 0.4s ease;
+                ">
+                    <div style="font-size: 4em; margin-bottom: 20px; animation: spin 1.5s linear infinite;">
+                        🔄
+                    </div>
+                    <div style="color: #d4af37; font-size: 1.8em; font-weight: 700; margin-bottom: 15px;">
+                        Analisando sua coleção...
+                    </div>
+                    <div style="color: #ccc; font-size: 1em; margin-bottom: 25px;">
+                        Processando dados e identificando padrões
+                    </div>
+                    
+                    <div style="
+                        width: 300px;
+                        height: 8px;
+                        background: rgba(212, 175, 55, 0.2);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin: 0 auto;
+                    ">
+                        <div id="progress-bar" style="
+                            width: 0%;
+                            height: 100%;
+                            background: linear-gradient(90deg, #d4af37, #f4e5b1);
+                            border-radius: 10px;
+                            transition: width 0.3s ease;
+                        "></div>
+                    </div>
+                </div>
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(overlay);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 4;
+                const bar = document.getElementById('progress-bar');
+                if (bar) bar.style.width = progress + '%';
+                if (progress >= 100) clearInterval(interval);
+            }, 100);
+        }
+
+        function fecharLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => overlay.remove(), 300);
+            }
+        }
+
+
+        // Função: Selecionar Clima
+        function selecionarClima(clima, btn) {
+            // Remover todas as classes de seleção
+            document.querySelectorAll('.clima-btn').forEach(function(b) {
+                b.classList.remove('selected-quente');
+                b.classList.remove('selected-temperado');
+                b.classList.remove('selected-frio');
+            });
+            
+            // Adicionar classe específica do clima
+            btn.classList.add('selected-' + clima);
+            
+            document.getElementById('clima').value = clima;
+            localStorage.setItem('clima', clima);
+        }
+
+        // LÓGICA INTELIGENTE: Selecionar 3 melhores famílias faltantes
+        function selecionarMelhoresFamilias(familiasFaltando, clima, ambiente) {
+            // Score de cada família por contexto
+            const scores = {
+                'fresco': {
+                    'quente': 10, 'temperado': 8, 'frio': 4,
+                    'fechado': 9, 'aberto': 7, 'ambos': 8
+                },
+                'aromatico': {
+                    'quente': 7, 'temperado': 9, 'frio': 6,
+                    'fechado': 8, 'aberto': 9, 'ambos': 9
+                },
+                'doce': {
+                    'quente': 4, 'temperado': 7, 'frio': 10,
+                    'fechado': 6, 'aberto': 8, 'ambos': 7
+                },
+                'amadeirado': {
+                    'quente': 6, 'temperado': 9, 'frio': 10,
+                    'fechado': 10, 'aberto': 7, 'ambos': 9
+                },
+                'especiado': {
+                    'quente': 5, 'temperado': 8, 'frio': 10,
+                    'fechado': 7, 'aberto': 8, 'ambos': 8
+                },
+                'aquatico': {
+                    'quente': 10, 'temperado': 8, 'frio': 5,
+                    'fechado': 8, 'aberto': 9, 'ambos': 9
+                },
+                'talco': {
+                    'quente': 8, 'temperado': 9, 'frio': 7,
+                    'fechado': 10, 'aberto': 6, 'ambos': 8
+                },
+                'floral': {
+                    'quente': 7, 'temperado': 9, 'frio': 6,
+                    'fechado': 8, 'aberto': 9, 'ambos': 8
+                },
+                'frutas': {
+                    'quente': 9, 'temperado': 8, 'frio': 5,
+                    'fechado': 7, 'aberto': 9, 'ambos': 8
+                }
+            };
+
+            // Calcular score total para cada família faltando
+            const familiasComScore = familiasFaltando.map(familia => {
+                const scoreClima = scores[familia.key]?.[clima] || 5;
+                const scoreAmbiente = scores[familia.key]?.[ambiente] || 5;
+                const scoreTotal = scoreClima + scoreAmbiente;
+                
+                return {
+                    ...familia,
+                    score: scoreTotal
+                };
+            });
+
+            // Ordenar por score (maior para menor) e pegar top 3
+            return familiasComScore
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
+        }
+        function processarAnalise(families, total) {
+            const climaRegiao = document.getElementById('clima').value || 'temperado';
+            const ambiente = document.getElementById('ambiente').value || 'ambos';
+            
+            // Pegar checkboxes marcadas para passar para recomendações
+            const checkboxes = document.querySelectorAll('.familia-checkbox:checked');
+            
+            // Calcular nível baseado em quantas famílias marcou
+            let level = '';
+            if (checkboxes.length === 1) {
+                level = 'INICIANTE';
+            } else if (checkboxes.length === 2) {
+                level = 'INICIANTE/INTERMEDIÁRIO';
+            } else if (checkboxes.length === 3) {
+                level = 'INTERMEDIÁRIO';
+            } else {
+                level = 'AVANÇADO';
+            }
+
+            // Pegar famílias que a pessoa TEM (value > 0)
+            const familiasTem = [];
+            Object.entries(families).forEach(([key, data]) => {
+                if (data.value > 0) {
+                    familiasTem.push({ key, ...data });
+                }
+            });
+
+            // Pegar famílias que FALTAM
+            const familiasFaltam = [];
+            Object.entries(families).forEach(([key, data]) => {
+                if (data.value === 0) {
+                    familiasFaltam.push({ key, ...data });
+                }
+            });
+
+            const totalFamilias = familiasTem.length;
+
+            // Emojis de clima
+            const climaEmojis = {
+                'quente': '☀️ Quente',
+                'temperado': '🌤️ Temperado',
+                'frio': '❄️ Frio'
+            };
+
+            // Montar cards de info
+            const dominantDiv = document.getElementById('dominant-family');
+            const infoCards = `
+                <div style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 12px;
+                    margin-bottom: 20px;
+                ">
+                    <div style="
+                        background: linear-gradient(135deg, rgba(100, 150, 255, 0.15), rgba(100, 150, 255, 0.05));
+                        border: 2px solid rgba(100, 150, 255, 0.4);
+                        border-radius: 8px;
+                        padding: 12px;
+                    ">
+                        <div style="font-size: 0.85em; color: #9bc4ff; margin-bottom: 6px; font-weight: 600;">🌡️ CLIMA</div>
+                        <div style="color: #fff; font-size: 0.95em; line-height: 1.5;">
+                            ${climaEmojis[climaRegiao]}
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        background: linear-gradient(135deg, rgba(100, 150, 255, 0.15), rgba(100, 150, 255, 0.05));
+                        border: 2px solid rgba(100, 150, 255, 0.4);
+                        border-radius: 8px;
+                        padding: 12px;
+                    ">
+                        <div style="font-size: 0.85em; color: #9bc4ff; margin-bottom: 6px; font-weight: 600;">💼 AMBIENTE</div>
+                        <div style="color: #fff; font-size: 0.95em;">
+                            ${{'fechado': 'Fechado', 'aberto': 'Aberto', 'ambos': 'Ambos'}[ambiente]}
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+                        border: 2px solid rgba(212, 175, 55, 0.4);
+                        border-radius: 8px;
+                        padding: 12px;
+                    ">
+                        <div style="font-size: 0.85em; color: #d4af37; margin-bottom: 6px; font-weight: 600;">🎯 FAMÍLIAS</div>
+                        <div style="color: #fff; font-size: 1.3em; font-weight: 700;">${totalFamilias}/9</div>
+                    </div>
+                </div>
+                
+                <style>
+                    @media (max-width: 768px) {
+                        #dominant-family > div:first-child {
+                            grid-template-columns: 1fr !important;
+                        }
+                    }
+                </style>
+            `;
+
+            dominantDiv.innerHTML = infoCards;
+
+            // NOVO DIAGNÓSTICO
+            const adviceDiv = document.getElementById('balance-advice');
+            
+            // Montar lista de famílias que TEM
+            const nomesFamiliasTem = familiasTem.map(f => f.name).join(', ');
+            
+            // Selecionar TOP 3 famílias prioritárias baseado em clima + ambiente
+            const top3Prioritarias = selecionarMelhoresFamilias(familiasFaltam, climaRegiao, ambiente);
+            
+            // Criar lista VERTICAL com prioridades
+            let listaPrioridades = '';
+            if (top3Prioritarias.length > 0) {
+                const emojis = ['🔴', '🔵', '🟢'];
+                const titulos = ['PRIORIDADE 1', 'PRIORIDADE 2', 'PRIORIDADE 3'];
+                const cores = ['#ff6b6b', '#4ecdc4', '#95e1d3'];
+                
+                listaPrioridades = top3Prioritarias.map((familia, index) => `
+                    <div style="
+                        margin-bottom: 15px;
+                        padding: 15px;
+                        background: rgba(0, 0, 0, 0.3);
+                        border-left: 4px solid ${cores[index]};
+                        border-radius: 8px;
+                    ">
+                        <div style="color: ${cores[index]}; font-size: 0.9em; font-weight: 700; margin-bottom: 5px;">
+                            ${emojis[index]} ${titulos[index]}
+                        </div>
+                        <div style="color: #fff; font-size: 1.2em; font-weight: 600;">
+                            ${familia.name}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                listaPrioridades = '<div style="color: #ccc;">Você já tem uma coleção diversificada!</div>';
+            }
+
+            let diagnostico = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <div style="
+                        display: inline-block;
+                        background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+                        border: 2px solid #d4af37;
+                        border-radius: 8px;
+                        padding: 10px 30px;
+                    ">
+                        <span style="color: #d4af37; font-size: 1.3em; font-weight: 700; letter-spacing: 2px;">
+                            📋 DIAGNÓSTICO
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="
+                    background: linear-gradient(135deg, rgba(100, 150, 255, 0.15), rgba(100, 150, 255, 0.05));
+                    border-left: 5px solid #9bc4ff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                ">
+                    <div style="color: #9bc4ff; font-size: 1.2em; font-weight: 700; margin-bottom: 15px;">
+                        ✅ FAMÍLIAS NA SUA COLEÇÃO:
+                    </div>
+                    <div style="color: #fff; font-size: 1.1em; line-height: 1.6;">
+                        ${nomesFamiliasTem || 'Nenhuma família selecionada'}
+                    </div>
+                </div>
+                
+                <div style="
+                    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+                    border-left: 5px solid #d4af37;
+                    padding: 20px;
+                    border-radius: 8px;
+                ">
+                    <div style="color: #d4af37; font-size: 1.3em; font-weight: 700; margin-bottom: 15px;">
+                        🎯 TOP 3 Famílias Prioritárias para você:
+                    </div>
+                    <div style="font-size: 1em; color: #f4e5b1; line-height: 1.6; margin-bottom: 20px;">
+                        Com base no seu <strong style="color: #fff;">clima ${climaEmojis[climaRegiao]}</strong> e 
+                        ambiente <strong style="color: #fff;">${{'fechado': '🏢 fechado', 'aberto': '🌳 aberto', 'ambos': '🔄 variado'}[ambiente]}</strong>, 
+                        estas são as famílias mais importantes para você adicionar:
+                    </div>
+                    ${listaPrioridades}
+                </div>
+            `;
+
+
+            // Sugestões em largura total
+            let nextPurchase = `
+                <div style="margin-top: 30px;">
+                    <!-- SUGESTÕES PERSONALIZADAS (DINÂMICO) -->
+                    ${generateRecommendationsBlock(checkboxes, climaRegiao, ambiente, level)}
+                </div>
+            `;
+            
+            // Adicionar os CTAs ao adviceDiv
+            adviceDiv.innerHTML = diagnostico + nextPurchase;
+
+            // Mostrar resultado
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+
+            // ABRIR POPUP DE CAPTURA AUTOMATICAMENTE
+            setTimeout(() => {
+                abrirPopupCaptura();
+            }, 500);
+        }
+
+        // Popup para quem não sabe nada de perfumes
+
+        // ABRIR POPUP DE CAPTURA
+        function abrirPopupCaptura() {
+            document.getElementById('popup-captura').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevenir scroll
+        }
+
+        // FECHAR POPUP DE CAPTURA
+        function fecharPopupCaptura() {
+            document.getElementById('popup-captura').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // DESBLOQUEAR RESULTADO
+        function desbloquearResultado() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.filter = 'none';
+            resultDiv.style.pointerEvents = 'auto';
+            resultDiv.style.userSelect = 'auto';
+        }
+
+        // INICIALIZAR EMAILJS
+        (function() {
+            emailjs.init("fyJYlmRYKOsvdjMjZ"); // VOCÊ PRECISA SUBSTITUIR
+        })();
+
+        // ============================================
+        // CONTADORES SOCIAL PROOF INDIVIDUAIS
+        // ============================================
+        
+        function generateCounter(elementId, storageKey, baseMin, baseMax, hourlyMin, hourlyMax) {
+            const counterEl = document.getElementById(elementId);
+            if (!counterEl) return;
+            
+            // Gerar número baseado na data + hora (consistente durante o dia)
+            const today = new Date();
+            const dateKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+            
+            // Verificar se já temos um valor salvo para hoje
+            const savedData = localStorage.getItem(storageKey);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.date === dateKey) {
+                        // Usar valor salvo
+                        counterEl.textContent = parsed.count;
+                        console.log(`🔥 ${storageKey}:`, parsed.count, '(cached)');
+                        return;
+                    }
+                } catch(e) {}
+            }
+            
+            // Gerar novo número para hoje
+            // Hash simples da data para consistência
+            const dateHash = dateKey.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const dailyVariation = dateHash % (baseMax - baseMin);
+            const baseCount = baseMin + dailyVariation;
+            
+            // Incremento baseado na hora (manhã < tarde < noite)
+            const hour = today.getHours();
+            let hourBoost = 0;
+            if (hour >= 6 && hour < 12) {
+                hourBoost = Math.floor(Math.random() * (hourlyMax * 0.25)); // Manhã: 25%
+            } else if (hour >= 12 && hour < 18) {
+                hourBoost = Math.floor(hourlyMax * 0.25) + Math.floor(Math.random() * (hourlyMax * 0.35)); // Tarde: 25-60%
+            } else if (hour >= 18 && hour < 24) {
+                hourBoost = Math.floor(hourlyMax * 0.6) + Math.floor(Math.random() * (hourlyMax * 0.4)); // Noite: 60-100%
+            } else {
+                hourBoost = Math.floor(Math.random() * (hourlyMax * 0.1)); // Madrugada: 0-10%
+            }
+            
+            const finalCount = baseCount + hourBoost;
+            
+            // Salvar no localStorage
+            const dataToSave = {
+                date: dateKey,
+                count: finalCount
+            };
+            localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+            
+            // Exibir com animação
+            counterEl.style.opacity = '0';
+            setTimeout(() => {
+                counterEl.textContent = finalCount;
+                counterEl.style.transition = 'opacity 0.5s ease';
+                counterEl.style.opacity = '1';
+            }, 100);
+            
+            console.log(`🔥 ${storageKey}:`, finalCount, '(new)');
+        }
+        
+        function initSocialProofCounters() {
+            // CONTADOR 1: Iniciantes (descobriram a perfumaria)
+            // Menor volume, mais iniciantes
+            generateCounter('counter-iniciante', 'counter_iniciante', 80, 180, 0, 90);
+            
+            // CONTADOR 2: Colecionadores (melhoraram coleção)
+            // Maior volume, público mais engajado
+            generateCounter('counter-colecao', 'counter_colecao', 150, 280, 0, 120);
+        }
+        
+        // Inicializar contadores quando página carregar
+        document.addEventListener('DOMContentLoaded', initSocialProofCounters);
+
+        // ENVIAR EMAIL COM DIAGNÓSTICO
+        // ENVIAR EMAIL COM DIAGNÓSTICO
+        function enviarDiagnostico(nome, email) {
+            console.log('🚀 Iniciando envio de diagnóstico...');
+            
+            // Capturar clima e ambiente
+            const climaRegiao = document.getElementById('clima').value || 'temperado';
+            const ambiente = document.getElementById('ambiente').value || 'ambos';
+            
+            // Pegar famílias selecionadas dos checkboxes (NÃO de inputs numéricos!)
+            const checkboxes = document.querySelectorAll('.familia-checkbox:checked');
+            
+            console.log('✅ Checkboxes selecionadas:', checkboxes.length);
+            
+            const familiasSelecionadas = [];
+            const families = {
+                'fresco': { name: '🍋 Fresco/Cítrico', value: 0 },
+                'aromatico': { name: '🌿 Aromático/Verde', value: 0 },
+                'doce': { name: '🍯 Doce/Gourmand', value: 0 },
+                'amadeirado': { name: '🪵 Amadeirado', value: 0 },
+                'especiado': { name: '🔥 Especiado/Oriental', value: 0 },
+                'aquatico': { name: '🌊 Aquático', value: 0 },
+                'talco': { name: '🧼 Talco/Fougère', value: 0 },
+                'floral': { name: '🌸 Floral', value: 0 },
+                'frutas': { name: '🍓 Frutas', value: 0 }
+            };
+            
+            // Atribuir valores baseado na ordem
+            checkboxes.forEach((checkbox, index) => {
+                const familiaKey = checkbox.dataset.familia;
+                if (index === 0) {
+                    families[familiaKey].value = 10; // Dominante
+                } else if (index === 1) {
+                    families[familiaKey].value = 5; // Segunda
+                } else if (index === 2) {
+                    families[familiaKey].value = 3; // Terceira
+                }
+            });
+            
+            // Calcular totais
+            const totalPerfumes = checkboxes.length * 6; // Simular
+            const totalFamilias = checkboxes.length;
+            
+            // Calcular dominante
+            let dominant = null;
+            let maxValue = 0;
+            Object.entries(families).forEach(([key, data]) => {
+                if (data.value > maxValue) {
+                    maxValue = data.value;
+                    dominant = { key, ...data };
+                }
+            });
+            
+            const percentage = totalPerfumes > 0 ? ((maxValue / (maxValue + 5 + 3)) * 100).toFixed(0) : 0;
+            const familiaDominanteNome = dominant ? `${dominant.name}` : 'Nenhuma';
+            const familiaDominanteDetalhes = dominant ? `${checkboxes.length >= 1 ? 'Família principal' : 'N/A'}` : '';
+            
+            // Calcular nível baseado em quantas famílias marcou
+            let level = '';
+            if (checkboxes.length === 1) {
+                level = 'INICIANTE';
+            } else if (checkboxes.length === 2) {
+                level = 'INICIANTE/INTERMEDIÁRIO';
+            } else if (checkboxes.length === 3) {
+                level = 'INTERMEDIÁRIO';
+            } else {
+                level = 'AVANÇADO';
+            }
+            
+            // Capturar diagnóstico (pode não existir ainda)
+            let diagnostico = 'Diagnóstico em processamento...';
+            const adviceEl = document.getElementById('balance-advice');
+            if (adviceEl && adviceEl.innerText) {
+                diagnostico = adviceEl.innerText;
+            }
+            
+            // Criar diagnóstico resumido
+            let diagnosticoResumido = `Nível: ${level}\nFamílias selecionadas: ${checkboxes.length}/9`;
+            
+            // Emojis de clima
+            const climaEmojis = {
+                'quente': '☀️ Quente',
+                'temperado': '🌤️ Temperado',
+                'frio': '❄️ Frio'
+            };
+            
+            const ambienteNomes = {
+                'fechado': '🏢 Fechado',
+                'aberto': '🌳 Aberto',
+                'ambos': '🔄 Ambos'
+            };
+            
+            // ============================================
+            // BUSCAR SUGESTÕES PERSONALIZADAS PARA EMAIL
+            // ============================================
+            
+            // Pegar checkboxes na ordem de clique
+            const checkboxesOrdenados = getCheckboxesInClickOrder();
+            
+            // Capturar famílias selecionadas NA ORDEM DE CLIQUE
+            const familiasSelecionadasKeys = [];
+            checkboxesOrdenados.forEach(cb => {
+                const familiaKey = cb.dataset.familia;
+                if (FAMILIA_MAPPING[familiaKey]) {
+                    familiasSelecionadasKeys.push(FAMILIA_MAPPING[familiaKey]);
+                }
+            });
+            
+            console.log('📧 [EMAIL] Ordem de clique:', familiaClickOrder);
+            console.log('📧 [EMAIL] Famílias ordenadas:', familiasSelecionadasKeys);
+            
+            // Criar perfil do usuário
+            const userProfile = {
+                familias: familiasSelecionadasKeys,
+                clima: CLIMA_MAPPING[climaRegiao] || 'temperado',
+                ambiente: ambiente || 'fechado',
+                nivel: NIVEL_MAPPING[level] || 'intermediario'
+            };
+            
+            // Obter top 3 recomendações
+            const top3 = getTop3Recommendations(userProfile);
+            
+            console.log('🎯 Top 3 para email:', top3);
+            
+            // Formatar sugestões para email (variáveis separadas)
+            const sugestao1_nome = top3[0].nome;
+            const sugestao1_marca = top3[0].marca;
+            const sugestao1_familia = top3[0].familia;
+            const sugestao1_notas = top3[0].notas;
+            const sugestao1_preco = top3[0].preco;
+            const sugestao1_desc = top3[0].desc;
+            
+            // Capturar prioridades para email (USAR NOMES COMPLETOS COM EMOJIS)
+            const prioridade1 = familiasSelecionadasKeys[0] ? (FAMILIA_NOME_COMPLETO[familiasSelecionadasKeys[0]] || familiasSelecionadasKeys[0]) : 'Não selecionada';
+            const prioridade2 = familiasSelecionadasKeys[1] ? (FAMILIA_NOME_COMPLETO[familiasSelecionadasKeys[1]] || familiasSelecionadasKeys[1]) : 'Não selecionada';
+            const prioridade3 = familiasSelecionadasKeys[2] ? (FAMILIA_NOME_COMPLETO[familiasSelecionadasKeys[2]] || familiasSelecionadasKeys[2]) : 'Não selecionada';
+            
+            console.log('📋 Prioridades para email:', { prioridade1, prioridade2, prioridade3 });
+            
+            // ============================================
+            // FIM DAS SUGESTÕES
+            // ============================================
+            
+            const templateParams = {
+                to_name: nome,
+                to_email: email,
+                nivel: level,
+                clima: climaEmojis[climaRegiao] || climaRegiao,
+                ambiente: ambienteNomes[ambiente] || ambiente,
+                // total_perfumes: totalPerfumes,
+                total_familias: totalFamilias,
+                // familia_dominante_nome: familiaDominanteNome,
+                // familia_dominante_detalhes: familiaDominanteDetalhes,
+                diagnostico_resumido: diagnosticoResumido,
+                quiz_q1: quizAnswers.q1 || 'não respondido',
+                quiz_q2: quizAnswers.q2 || 'não respondido',
+                quiz_q3: quizAnswers.q3 || 'não respondido',
+                prioridade1: prioridade1,
+                prioridade2: prioridade2,
+                prioridade3: prioridade3,
+                perfume_nome: sugestao1_nome,
+                perfume_marca: sugestao1_marca,
+                perfume_familia: sugestao1_familia,
+                perfume_notas: sugestao1_notas,
+                perfume_preco: sugestao1_preco,
+                perfume_desc: sugestao1_desc
+            };
+            
+            console.log('📧 Enviando com params:', templateParams);
+            
+            // ============================================
+            // ENVIAR DADOS PARA GOOGLE SHEETS
+            // ============================================
+            
+            
+            // Capturar dados de tracking
+            console.log('🔍 Lendo localStorage cta_tracking...');
+            const ctaTrackingRaw = localStorage.getItem('cta_tracking');
+            console.log('📦 localStorage RAW:', ctaTrackingRaw);
+            
+            const ctaTracking = JSON.parse(ctaTrackingRaw || '{}');
+            console.log('📋 ctaTracking parseado:', ctaTracking);
+            console.log('🎯 CTA que vai ser enviado:', ctaTracking.cta_clicado || 'Nenhum');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            const sheetsData = {
+                timestamp: new Date().toLocaleString('pt-BR'),
+                to_name: nome,
+                to_email: email,
+                nivel: level,
+                clima: climaEmojis[climaRegiao] || climaRegiao,
+                ambiente: ambienteNomes[ambiente] || ambiente,
+                total_familias: totalFamilias,
+                diagnostico_resumido: diagnosticoResumido,
+                quiz_q1: quizAnswers.q1 || 'não respondido',
+                quiz_q2: quizAnswers.q2 || 'não respondido',
+                quiz_q3: quizAnswers.q3 || 'não respondido',
+                cta_clicado: ctaTracking.cta_clicado || 'Nenhum',
+                data_clique_cta: ctaTracking.data_clique || '-',
+                screen: window.screen.width + '×' + window.screen.height,
+                device_type: /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                browser: (navigator.userAgent.match(/(Firefox|Chrome|Safari|Edge|Opera)/) || ['Other'])[0],
+                utm_source: urlParams.get('utm_source') || '-',
+                utm_medium: urlParams.get('utm_medium') || '-',
+                utm_campaign: urlParams.get('utm_campaign') || '-',
+                utm_content: urlParams.get('utm_content') || '-',
+                utm_term: urlParams.get('utm_term') || '-'
+            };
+            
+            console.log('📊 Dados para Sheets:', sheetsData);
+            
+            // Enviar para Google Sheets via GET com URL parameters
+            const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwVsf5BS_uSNmcGHzM8NTXlhquBXQ7qwejle6NpB7g4rUfdXnIkGrqW937ZeOXp9xQ/exec';
+            
+            try {
+                // Criar URL com parâmetros
+                const params = new URLSearchParams();
+                
+                // Adicionar cada campo como parâmetro separado
+                params.append('timestamp', sheetsData.timestamp);
+                params.append('to_name', sheetsData.to_name);
+                params.append('to_email', sheetsData.to_email);
+                params.append('nivel', sheetsData.nivel);
+                params.append('clima', sheetsData.clima);
+                params.append('ambiente', sheetsData.ambiente);
+                params.append('total_familias', sheetsData.total_familias);
+                params.append('diagnostico_resumido', sheetsData.diagnostico_resumido);
+                params.append('quiz_q1', sheetsData.quiz_q1);
+                params.append('quiz_q2', sheetsData.quiz_q2);
+                params.append('quiz_q3', sheetsData.quiz_q3);
+                params.append('cta_clicado', sheetsData.cta_clicado);
+                params.append('data_clique_cta', sheetsData.data_clique_cta);
+                params.append('screen', sheetsData.screen);
+                params.append('device_type', sheetsData.device_type);
+                params.append('browser', sheetsData.browser);
+                params.append('utm_source', sheetsData.utm_source);
+                params.append('utm_medium', sheetsData.utm_medium);
+                params.append('utm_campaign', sheetsData.utm_campaign);
+                params.append('utm_content', sheetsData.utm_content);
+                params.append('utm_term', sheetsData.utm_term);
+                
+                const finalUrl = SHEETS_URL + '?' + params.toString();
+                
+                console.log('📤 Enviando via GET para:', finalUrl.substring(0, 150) + '...');
+                
+                // Criar iframe invisível
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = finalUrl;
+                document.body.appendChild(iframe);
+                
+                console.log('✅ Dados enviados para Google Sheets!');
+                
+                // Remover iframe após 3 segundos
+                setTimeout(() => {
+                    try {
+                        document.body.removeChild(iframe);
+                    } catch(e) {}
+                }, 3000);
+            } catch(error) {
+                console.error('❌ Erro ao enviar para Sheets:', error);
+            }
+            
+            // ============================================
+            // FIM DO ENVIO PARA GOOGLE SHEETS
+            // ============================================
+
+
+            return emailjs.send('service_gy6byvf', 'template_fl5funp', templateParams)
+                .then(response => {
+                    console.log('✅ Email enviado com sucesso!', response);
+                    
+                    // META PIXEL: Evento Lead
+                    if (typeof fbq !== 'undefined') {
+                        fbq('track', 'Lead', {
+                            content_name: 'Diagnóstico de Perfumaria',
+                            content_category: 'Lead Magnet'
+                        });
+                    }
+                    
+                    return response;
+                })
+                .catch(error => {
+                    console.error('❌ Erro ao enviar email:', error);
+                    throw error;
+                });
+        }
+
+        // HANDLER DO FORMULÁRIO
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('form-captura');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const nome = document.getElementById('capture-name').value;
+                    const email = document.getElementById('capture-email').value;
+                    
+                    if (!nome || !email) {
+                        alert('Por favor, preencha todos os campos!');
+                        return;
+                    }
+                    
+                    // Desabilitar botão
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = '⏳ ENVIANDO...';
+                    
+                    // Enviar email
+                    enviarDiagnostico(nome, email)
+                        .then(function(response) {
+                            console.log('Email enviado!', response);
+                            
+                            // Fechar popup
+                            fecharPopupCaptura();
+                            
+                            // Desbloquear resultado
+                            desbloquearResultado();
+                            
+                            // Enviar para Google Sheets também
+                            sendToSheet({
+                                etapa: 'Converteu',
+                                q1: quizAnswers.q1,
+                                q2: quizAnswers.q2,
+                                q3: quizAnswers.q3,
+                                nome: nome,
+                                email: email,
+                                status: 'Lead Capturado'
+                            });
+                        })
+                        .catch(function(error) {
+                            console.error('Erro ao enviar:', error);
+                            alert('Erro ao enviar. Tente novamente!');
+                            btn.disabled = false;
+                            btn.innerHTML = '🚀 QUERO MEU DIAGNÓSTICO!';
+                        });
+                });
+            }
+        });
+        function abrirPopupIniciante() {
+            // MOSTRAR LOADING
+            mostrarLoadingIniciante();
+
+            // Após 2 segundos, fecha loading e abre popup
+            setTimeout(() => {
+                fecharLoading();
+                mostrarPopupIniciante();
+            }, 2000);
+        }
+
+        function mostrarLoadingIniciante() {
+            const overlay = document.createElement('div');
+            overlay.id = 'loading-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            overlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                    border: 3px solid #d4af37;
+                    border-radius: 20px;
+                    padding: 50px 60px;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
+                    animation: slideUp 0.4s ease;
+                ">
+                    <div style="font-size: 4em; margin-bottom: 20px; animation: spin 1.5s linear infinite;">
+                        🤔
+                    </div>
+                    <div style="color: #d4af37; font-size: 1.8em; font-weight: 700; margin-bottom: 15px;">
+                        Computando resposta...
+                    </div>
+                    <div style="color: #ccc; font-size: 1em; margin-bottom: 25px;">
+                        Identificando a melhor solução para você
+                    </div>
+                    
+                    <div style="
+                        width: 300px;
+                        height: 8px;
+                        background: rgba(212, 175, 55, 0.2);
+                        border-radius: 10px;
+                        overflow: hidden;
+                        margin: 0 auto;
+                    ">
+                        <div id="progress-bar-iniciante" style="
+                            width: 0%;
+                            height: 100%;
+                            background: linear-gradient(90deg, #d4af37, #f4e5b1);
+                            border-radius: 10px;
+                            transition: width 0.3s ease;
+                        "></div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                const bar = document.getElementById('progress-bar-iniciante');
+                if (bar) bar.style.width = progress + '%';
+                if (progress >= 100) clearInterval(interval);
+            }, 100);
+        }
+
+        function mostrarPopupIniciante() {
+            const overlay = document.createElement('div');
+            overlay.id = 'popup-iniciante';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                z-index: 9999;
+                animation: fadeIn 0.3s ease;
+                overflow-y: auto;
+                padding: 80px 20px 20px 20px;
+            `;
+
+            overlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                    border: 3px solid #d4af37;
+                    border-radius: 20px;
+                    padding: 50px;
+                    max-width: 700px;
+                    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
+                    animation: slideUp 0.4s ease;
+                ">
+                    <div style="font-size: 3em; text-align: center; margin-bottom: 10px;">📚</div>
+                    
+                    <div style="color: #d4af37; font-size: 2em; font-weight: 700; text-align: center; margin-bottom: 30px; line-height: 1.15;">
+                        RESULTADO DA ANÁLISE:<br>
+                        Você precisa aprender Perfumaria Masculina!
+                    </div>
+                    
+                    <div style="
+                        color: #f4e5b1;
+                        font-size: 1.2em;
+                        line-height: 1.8;
+                        margin-bottom: 35px;
+                        text-align: center;
+                        padding: 20px;
+                        background: rgba(212, 175, 55, 0.1);
+                        border-radius: 10px;
+                    ">
+                        Você ainda não sabe, mas está <strong style="color: #fff;">perdendo a chance de ser memorável</strong>, de se sentir e estar bem. Com a Perfumaria, você deixa de ser mais um e passa a ser <strong style="color: #d4af37;">inesquecível</strong>.
+                    </div>
+                    
+                    <div style="
+                        color: #fff;
+                        font-size: 1.15em;
+                        line-height: 1.8;
+                        margin-bottom: 35px;
+                        text-align: center;
+                        padding: 25px;
+                        background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+                        border-left: 4px solid #d4af37;
+                        border-radius: 10px;
+                    ">
+                        Descubra como <strong style="color: #d4af37;">homens como você</strong> vêm sendo <strong style="color: #f4e5b1;">notados, admirados e respeitados</strong> apenas porque passaram a entender como usar perfumes ao seu favor, <strong style="color: #fff;">na hora e na ocasião certa</strong>. <strong style="color: #d4af37;">E eu quero que você seja como eles.</strong> Tudo que você precisa é o <strong style="color: #f4e5b1;">Guia da Perfumaria Masculina</strong>.
+                    </div>
+                    
+                    <div style="
+                        background: rgba(0, 0, 0, 0.3);
+                        padding: 30px;
+                        border-radius: 12px;
+                        margin-bottom: 30px;
+                    ">
+                        <div style="color: #d4af37; font-size: 1.4em; font-weight: 700; margin-bottom: 20px; text-align: center; line-height: 1.3;">
+                            📦 O que você vai receber no Guia de Perfumaria Masculina:
+                        </div>
+                        
+                        <div style="color: #fff; font-size: 1.05em; line-height: 1.8;">
+                            🤖 <strong>O Perfumista</strong> - Agente de I.A. 24 horas ao seu lado para te mostrar a sugestão perfeita para cada ocasião.<br><br>
+                            📚 <strong>Famílias Olfativas</strong> - Entenda os tipos, características e quando e onde usar cada uma. Aqui você vai parar de afastar as pessoas e vai começar a conquistá-las sem soltar uma palavra!<br><br>
+                            ✅ <strong>Boas Práticas</strong> - Como aplicar e armazenar corretamente. Não adianta conhecer perfumes. Tem que saber como usar e como guardar. Você não quer exagerar e ganhar a má-fama de exagerado, não é?
+                        </div>
+                    </div>
+                    
+                    <a href="https://pay.hotmart.com/H102542620H?checkoutMode=10" target="_blank" style="text-decoration: none;" onclick="trackCTAClick('Guia - Popup Iniciante'); return true;">
+                        <button style="
+                            width: 100%;
+                            background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                            color: #1e1e1e;
+                            border: none;
+                            padding: 20px 50px;
+                            border-radius: 12px;
+                            font-size: 1.4em;
+                            font-weight: 700;
+                            cursor: pointer;
+                            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+                            transition: all 0.3s ease;
+                            margin-bottom: 20px;
+                        " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(212, 175, 55, 0.7)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(212, 175, 55, 0.5)';">
+                            🚀 QUERO O GUIA AGORA!
+                        </button>
+                    </a>
+                    
+                    <div style="color: #888; font-size: 0.9em; cursor: pointer; margin-top: 15px; text-align: center;" onclick="fecharPopupIniciante()">
+                        Fechar (ou pressione ESC)
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') fecharPopupIniciante();
+            });
+        }
+
+        function fecharPopupIniciante() {
+            const popup = document.getElementById('popup-iniciante');
+            if (popup) popup.remove();
+        }
+
+        // Popup de conversão
+        function abrirPopupConversao() {
+            // ENVIAR DADOS: Clicou no botão de I.A.
+            sendToSheet({
+                etapa: 'Clicou I.A.',
+                q1: quizAnswers.q1,
+                q2: quizAnswers.q2,
+                q3: quizAnswers.q3,
+                clicouIA: 'Sim',
+                status: 'Interesse em Compra'
+            });
+
+            const overlay = document.createElement('div');
+            overlay.id = 'popup-conversao';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            overlay.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #2d2d2d 0%, #1e1e1e 100%);
+                    border: 3px solid #d4af37;
+                    border-radius: 20px;
+                    padding: 50px;
+                    max-width: 600px;
+                    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
+                    animation: slideUp 0.4s ease;
+                    text-align: center;
+                ">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🔓</div>
+                    <div style="color: #d4af37; font-size: 2em; font-weight: 700; margin-bottom: 20px;">
+                        Análise Completa Bloqueada
+                    </div>
+                    <div style="color: #ccc; font-size: 1.1em; line-height: 1.8; margin-bottom: 30px;">
+                        A análise completa com:<br><br>
+                        ✅ <strong style="color: white;">Recomendações personalizadas</strong> de perfumes<br>
+                        ✅ <strong style="color: white;">Consultoria com I.A.</strong> especializada<br>
+                        ✅ <strong style="color: white;">Plano de ação completo</strong> para sua coleção<br><br>
+                        Está disponível apenas para alunos do<br>
+                        <strong style="color: #d4af37; font-size: 1.2em;">Guia da Perfumaria Masculina</strong>
+                    </div>
+                    
+                    <a href="https://pay.hotmart.com/H102542620H?checkoutMode=10" target="_blank" style="text-decoration: none;">
+                        <button style="
+                            background: linear-gradient(135deg, #d4af37 0%, #f4e5b1 100%);
+                            color: #1e1e1e;
+                            border: none;
+                            padding: 20px 50px;
+                            border-radius: 12px;
+                            font-size: 1.3em;
+                            font-weight: 700;
+                            cursor: pointer;
+                            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+                            transition: all 0.3s ease;
+                            margin-bottom: 20px;
+                        " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(212, 175, 55, 0.7)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(212, 175, 55, 0.5)';">
+                            🚀 ACESSAR O CURSO COMPLETO
+                        </button>
+                    </a>
+                    
+                    <div style="color: #888; font-size: 0.9em; cursor: pointer; margin-top: 15px;" onclick="fecharPopup()">
+                        Fechar (ou pressione ESC)
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') fecharPopup();
+            });
+        }
+
+        function fecharPopup() {
+            const popup = document.getElementById('popup-conversao');
+            if (popup) popup.remove();
+        }
+
+        // Salvar contadores
+        ['fresco', 'aromatico', 'doce', 'amadeirado', 'especiado', 'aquatico', 'talco'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('change', function() {
+                    localStorage.setItem(`count_${id}`, this.value);
+                });
+                
+                const saved = localStorage.getItem(`count_${id}`);
+                if (saved) {
+                    input.value = saved;
+                }
+            }
+        });
+
+        // Mapeamento de cidades por estado com clima
+
+        // Salvar ambiente
+        const ambienteSelect = document.getElementById('ambiente');
+        if (ambienteSelect) {
+            ambienteSelect.addEventListener('change', function() {
+                localStorage.setItem('ambiente', this.value);
+            });
+            const savedAmbiente = localStorage.getItem('ambiente');
+            if (savedAmbiente) {
+                ambienteSelect.value = savedAmbiente;
+            }
+        }
+
+        // Salvar orçamento
+
+
+
+        // LIMITAR SELEÇÃO DE FAMÍLIAS A 3 (executa após DOM carregar)
+        document.addEventListener('DOMContentLoaded', function() {
+            let familiasOrdem = []; // Array para manter ordem de seleção
+            
+            document.querySelectorAll('.familia-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        familiasOrdem.push(this);
+                        
+                        
+                        // Destacar selecionada
+                        this.parentElement.style.background = 'rgba(212, 175, 55, 0.2)';
+                        this.parentElement.style.borderColor = '#d4af37';
+                        this.parentElement.style.boxShadow = '0 0 15px rgba(212, 175, 55, 0.4)';
+                    } else {
+                        // Remover da ordem
+                        const index = familiasOrdem.indexOf(this);
+                        if (index > -1) {
+                            familiasOrdem.splice(index, 1);
+                        }
+                        
+                        // Remover destaque
+                        this.parentElement.style.background = 'rgba(255, 255, 255, 0.05)';
+                        this.parentElement.style.borderColor = 'rgba(212, 175, 55, 0.3)';
+                        this.parentElement.style.boxShadow = 'none';
+                    }
+                });
+            });
+        });
+
+        // Restaurar clima salvo
+        const savedClima = localStorage.getItem('clima');
+        if (savedClima) {
+            document.getElementById('clima').value = savedClima;
+            const climaBtn = document.querySelector(`.clima-btn[onclick*="${savedClima}"]`);
+            if (climaBtn) {
+                // Remover todas as classes de seleção
+                document.querySelectorAll('.clima-btn').forEach(b => {
+                    b.classList.remove('selected-quente');
+                    b.classList.remove('selected-temperado');
+                    b.classList.remove('selected-frio');
+                });
+                // Adicionar classe específica
+                climaBtn.classList.add('selected-' + savedClima);
+            }
+        }
+        // Proteção anti-cópia nas sugestões personalizadas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Previne copiar, recortar e arrastar nas sugestões borradas
+            document.addEventListener('copy', function(e) {
+                const selection = window.getSelection().toString();
+                // Bloqueia se a seleção contém texto das sugestões
+                if (selection.includes('PRIORIDADE') || 
+                    selection.includes('Dior Sauvage') || 
+                    selection.includes('Acqua di Gio') || 
+                    selection.includes('Spicebomb')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            document.addEventListener('cut', function(e) {
+                const selection = window.getSelection().toString();
+                if (selection.includes('PRIORIDADE') || 
+                    selection.includes('Dior Sauvage') || 
+                    selection.includes('Acqua di Gio') || 
+                    selection.includes('Spicebomb')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+        
+        // ============================================
+        // EXIT INTENT POPUP
+        // ============================================
+        
+        let exitIntentShown = false;
+        
+        // Função para abrir popup de saída quando clicar no X
+        function abrirPopupSaidaDiferenciado() {
+            const popup = document.getElementById('popup-exit-intent');
+            if (popup) {
+                popup.style.display = 'flex';
+                
+                // Track evento
+                trackEvent('exit_via_x_button');
+                console.log('❌ Usuário clicou no X - Oferecendo 2 sugestões');
+            }
+        }
+        
+        // Mostrar popup de exit intent (função mantida para compatibilidade)
+        function mostrarExitPopup() {
+            abrirPopupSaidaDiferenciado();
+        }
+        
+        // Fechar popup de exit intent
+        function fecharExitPopup() {
+            const popup = document.getElementById('popup-exit-intent');
+            if (popup) {
+                popup.style.display = 'none';
+                
+                // Track evento
+                trackEvent('exit_intent_closed');
+                console.log('❌ Exit intent popup fechado');
+            }
+        }
+        
+        // Verificar rate limit (5 minutos)
+        function verificarRateLimit(email) {
+            const RATE_LIMIT_KEY = 'exit_intent_emails';
+            const RATE_LIMIT_MINUTES = 5;
+            
+            // Pegar histórico do localStorage
+            let emailHistory = {};
+            try {
+                const stored = localStorage.getItem(RATE_LIMIT_KEY);
+                if (stored) {
+                    emailHistory = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error('❌ Erro ao ler rate limit:', e);
+            }
+            
+            const now = Date.now();
+            const emailKey = email.toLowerCase().trim();
+            
+            // Verificar se email foi usado recentemente
+            if (emailHistory[emailKey]) {
+                const lastUsed = emailHistory[emailKey];
+                const minutesAgo = (now - lastUsed) / 1000 / 60;
+                
+                console.log(`⏰ Email "${email}" usado há ${minutesAgo.toFixed(1)} minutos`);
+                
+                if (minutesAgo < RATE_LIMIT_MINUTES) {
+                    const remaining = Math.ceil(RATE_LIMIT_MINUTES - minutesAgo);
+                    return {
+                        allowed: false,
+                        minutesRemaining: remaining
+                    };
+                }
+            }
+            
+            // Limpar emails antigos (mais de 1 hora)
+            Object.keys(emailHistory).forEach(key => {
+                const age = (now - emailHistory[key]) / 1000 / 60;
+                if (age > 60) {
+                    delete emailHistory[key];
+                }
+            });
+            
+            // Salvar novo timestamp
+            emailHistory[emailKey] = now;
+            try {
+                localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(emailHistory));
+            } catch (e) {
+                console.error('❌ Erro ao salvar rate limit:', e);
+            }
+            
+            return { allowed: true };
+        }
+        
+        // Enviar sugestão via exit intent
+        async function enviarExitIntent(event) {
+            event.preventDefault();
+            
+            const emailInput = document.getElementById('exit-email');
+            const submitBtn = document.getElementById('exit-submit-btn');
+            const errorMsg = document.getElementById('exit-error-msg');
+            const successMsg = document.getElementById('exit-success-msg');
+            
+            const email = emailInput.value.trim();
+            
+            // Esconder mensagens
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            console.log('📧 [EXIT INTENT] Tentando enviar para:', email);
+            
+            // Verificar rate limit
+            const rateCheck = verificarRateLimit(email);
+            if (!rateCheck.allowed) {
+                console.warn(`⏰ [RATE LIMIT] Email bloqueado. Aguarde ${rateCheck.minutesRemaining} minuto(s)`);
+                
+                errorMsg.textContent = `❌ Você já recebeu uma sugestão! Verifique seu email ou use outro endereço.`;
+                errorMsg.style.display = 'block';
+                
+                // Track bloqueio
+                trackEvent('exit_intent_rate_limited', { email, minutesRemaining: rateCheck.minutesRemaining });
+                
+                return;
+            }
+            
+            // Desabilitar botão
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ ENVIANDO...';
+            
+            try {
+                // Pegar TOP 2 perfumes (sem considerar família)
+                const allPerfumes = PERFUMES_DATABASE.map(p => ({
+                    ...p,
+                    score: Math.random() * 100 // Score aleatório para variedade
+                })).sort((a, b) => b.score - a.score);
+                
+                const perfume1 = allPerfumes[0];
+                const perfume2 = allPerfumes[1];
+                
+                console.log('🎯 Perfumes selecionados:');
+                console.log('   #1:', perfume1.nome);
+                console.log('   #2:', perfume2.nome);
+                
+                // Preparar dados do email com 2 perfumes
+                const emailParams = {
+                    to_email: email,
+                    to_name: 'Amigo',
+                    // Perfume #1
+                    perfume_nome: perfume1.nome,
+                    perfume_marca: perfume1.marca,
+                    perfume_familia: perfume1.familia,
+                    perfume_notas: perfume1.notas,
+                    perfume_preco: perfume1.preco,
+                    perfume_desc: perfume1.desc,
+                    // Perfume #2
+                    perfume2_nome: perfume2.nome,
+                    perfume2_marca: perfume2.marca,
+                    perfume2_familia: perfume2.familia,
+                    perfume2_notas: perfume2.notas,
+                    perfume2_preco: perfume2.preco,
+                    perfume2_desc: perfume2.desc,
+                    tipo_envio: 'Exit Intent - 2 Sugestões Upgrade'
+                };
+                
+                console.log('📧 Enviando email via EmailJS...');
+                
+                // Enviar via EmailJS - Template Exit Intent (2 Perfumes)
+                const response = await emailjs.send(
+                    'service_gy6byvf',
+                    'template_mukicfc',  // Template: "2 Perfumes Popup Saída"
+                    emailParams
+                );
+                
+                console.log('✅ Email enviado!', response);
+                
+                // Mostrar sucesso
+                successMsg.textContent = `✅ Enviado! Confira 2 sugestões no seu email: "${perfume1.nome}" e "${perfume2.nome}"!`;
+                successMsg.style.display = 'block';
+                
+                // Limpar formulário
+                emailInput.value = '';
+                
+                // Track sucesso
+                trackEvent('exit_intent_2_sugestoes_sent', { 
+                    email, 
+                    perfume1: perfume1.nome,
+                    perfume2: perfume2.nome
+                });
+                
+                // Enviar para Google Sheets
+                const sheetData = {
+                    timestamp: new Date().toLocaleString('pt-BR'),
+                    email: email,
+                    tipo: 'Exit Intent (2 Sugestões)',
+                    perfume: `${perfume1.nome} + ${perfume2.nome}`,
+                    familia: `${perfume1.familia} + ${perfume2.familia}`
+                };
+                
+                console.log('📊 Enviando para Google Sheets:', sheetData);
+                
+                const sheetUrl = `https://script.google.com/macros/s/AKfycbwVsf5BS_uSNmcGHzM8NTXlhquBXQ7qwejle6NpB7g4rUfdXnIkGrqW937ZeOXp9xQ/exec?${new URLSearchParams(sheetData)}`;
+                
+                await fetch(sheetUrl, { method: 'GET', mode: 'no-cors' });
+                console.log('✅ Dados enviados para Google Sheets!');
+                
+                // Fechar popup após 3 segundos
+                setTimeout(() => {
+                    fecharExitPopup();
+                }, 3000);
+                
+            } catch (error) {
+                console.error('❌ Erro ao enviar:', error);
+                
+                errorMsg.textContent = '❌ Erro ao enviar. Tente novamente!';
+                errorMsg.style.display = 'block';
+                
+                // Track erro
+                trackEvent('exit_intent_error', { error: error.message });
+            } finally {
+                // Reabilitar botão
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🎁 SIM, QUERO MINHA SUGESTÃO!';
+            }
+        }
+        
+        // Fechar popup com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharExitPopup();
+            }
+        });
+    </script>
+</body>
+</html>
